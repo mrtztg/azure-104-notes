@@ -148,6 +148,7 @@ Four major categories:
 #### Account / User
 - **Person**: User account with username, password, and MFA (multi-factor authentication)
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
+- **User creation**: By default, new users are created with the format `username@XXX.onmicrosoft.com` (e.g., `johndoe@example.onmicrosoft.com`). To use a custom domain, add it from the **Custom Domain Names** menu in Entra ID before creating users. From the **Custom Domain Names** screen, you can make a custom domain primary. With a custom domain, users can be created as `username@yourdomain.com` (e.g., `johndoe@example.com`).
 
 #### Tenant
 - A representation of an organization
