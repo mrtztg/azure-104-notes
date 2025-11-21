@@ -1,7 +1,7 @@
-# azure-104-notes
-## Cost centre
+# ☁️ azure-104-notes
+## 💰 Cost centre
 
-### Setting Cost Budgets in Azure
+### 💵 Setting Cost Budgets in Azure
 
 To set cost budgets in Azure:
 
