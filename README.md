@@ -157,6 +157,10 @@ Four major categories:
 - Every Azure account is part of at least one tenant
 - Each tenant can have any number of subscriptions (even 0)
 - More than one account can be the owner in a tenant
+- **Creating a new tenant**: If your account is not a global administrator (e.g., on dev plans), create a new Entra ID tenant via **Entra ID dashboard → Manage Tenants → Create Microsoft Entra ID** to gain necessary access. Now, this tenant will be yours.
+- **Switching tenants**: You can switch between tenants (e.g., from your company's tenant where you're a developer to your own tenant where you're a global administrator). Two methods:
+  - Navigate to **Entra ID → Manage Tenants**, select the desired tenant, and click **Switch**
+  - Click your **profile picture** in the right corner → **Switch directory** → click **Switch** on the desired directory (tenant)
 
 #### Subscription
 - An agreement with Microsoft to use Azure services and how to pay
@@ -169,3 +173,11 @@ Four major categories:
 - Used for organizing, managing, and billing resources
 
 ![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
+
+### Entra ID Management
+
+#### Assigned Roles
+- Access the **Assigned Roles** menu in Entra ID to view and manage role assignments for users and groups
+- Shows all roles assigned to a user or group across the tenant
+- Common roles include: Global Administrator, User Administrator, Application Administrator, and custom roles
+- Used to verify permissions and troubleshoot access issues
