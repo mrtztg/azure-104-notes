@@ -151,6 +151,10 @@ Four major categories:
   - From the **Custom Domain Names** screen, you can make a custom domain primary
   - With a custom domain, users can be created as `username@yourdomain.com` (e.g., `johndoe@example.com`)
   - New users have no permissions by default, only the ability to login to the Azure portal
+- **Bulk Operations**: In the **Users** menu, **Bulk Operations** allows you to perform bulk actions on multiple users at once:
+  - **Bulk create**: Download CSV template, fill with user data, and upload to create multiple users simultaneously
+  - **Bulk delete**: Delete multiple users at once
+  - **Bulk invite**: Send invitations to multiple users
 - **User Groups**: Groups are an organizational structure for putting users in. If you enable **"Azure AD roles can be assigned to the group"** during group creation, you can assign roles to the group (which will apply to all users in the group). By choosing **"Dynamic User"** in Membership Type during group creation, you can create dynamic groups with rules (e.g., if display name contains something, or if department is something, etc.)
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
 
@@ -188,7 +192,7 @@ Four major categories:
 - Used to verify permissions and troubleshoot access issues
 
 #### Licenses and Paid Features
-- Some Azure features are available only in paid plans (e.g., MFA for users, self-service password change)
+- Some Azure features are available only in paid plans (e.g. self-service password change)
 - If you have a paid license (like P2), you can enable those paid features for specific users
 - Better to enable only for users who need them, as paid features cost per person
 - To view licenses: Navigate to **Entra ID → Licenses** menu
@@ -210,3 +214,13 @@ Four major categories:
 - **Examples**:
   - **Department-based**: Create an Administrative Unit for "Sales Department", add Sales users and groups to it, then assign a User Administrator role scoped to that unit - they can only manage users and groups in Sales
   - **Geographic-based**: Create an Administrative Unit for "North America Region", add users and groups from that region, then assign administrators scoped to that unit - they can only manage resources in that region
+
+#### Devices
+- **Devices** menu in Entra ID shows devices that users used to login to applications (office, home, phone) as long as they authenticated through Azure
+- Can define requirements for devices that can connect to Azure (e.g., antivirus should be installed, password strength, etc.)
+- Can see all devices users used to connect
+- Devices can be used in other security features like **Conditional Access** (e.g., geographic-based access, force enable MFA if user is connecting from home device, etc.)
+- **Device Settings** (inside Devices menu): Configure settings such as:
+  - Who can access Entra ID (all users, selected users, or none)
+  - Require MFA on register
+  - Max devices per user
