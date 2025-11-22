@@ -146,15 +146,20 @@ Four major categories:
 ### Account / User
 - **Person**: User account with username, password, and MFA (multi-factor authentication)
   - Create a user from **Users** menu → **New User**
-  - By default, new users are created with the format `username@XXX.onmicrosoft.com` (e.g., `johndoe@example.onmicrosoft.com`)
-  - To use a custom domain, add it from the **Custom Domain Names** menu in Entra ID before creating users
-  - From the **Custom Domain Names** screen, you can make a custom domain primary
-  - With a custom domain, users can be created as `username@yourdomain.com` (e.g., `johndoe@example.com`)
+  - **User creation options** (radio group):
+    - **Create user** (default): For users within your organization
+      - By default, new users are created with the format `username@XXX.onmicrosoft.com` (e.g., `johndoe@example.onmicrosoft.com`)
+      - To use a custom domain, add it from the **Custom Domain Names** menu in Entra ID before creating users
+      - From the **Custom Domain Names** screen, you can make a custom domain primary
+      - With a custom domain, users can be created as `username@yourdomain.com` (e.g., `johndoe@example.com`)
+    - **Invite user**: For users whose email is not within your organization (e.g., contractors using personal accounts or external email addresses)
+      - Useful when the user's email is not `@yourcompany.onmicrosoft.com` or `@yourcompany.com`
+      - Most other options are similar to "Create user" (force MFA, using location, roles, groups, etc.)
   - New users have no permissions by default, only the ability to login to the Azure portal
-- **Bulk Operations**: In the **Users** menu, **Bulk Operations** allows you to perform bulk actions on multiple users at once:
-  - **Bulk create**: Download CSV template, fill with user data, and upload to create multiple users simultaneously
-  - **Bulk delete**: Delete multiple users at once
-  - **Bulk invite**: Send invitations to multiple users
+- **Bulk Operations**: Available in multiple areas to perform bulk actions:
+  - **Users menu**: Bulk create (download CSV template, fill with user data, and upload), bulk delete, bulk invite, download users
+  - **Group members**: Import members, remove members, download members
+  - Other areas may also have bulk operations
 - **User Groups**: Groups are an organizational structure for putting users in. If you enable **"Azure AD roles can be assigned to the group"** during group creation, you can assign roles to the group (which will apply to all users in the group). By choosing **"Dynamic User"** in Membership Type during group creation, you can create dynamic groups with rules (e.g., if display name contains something, or if department is something, etc.)
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
 
@@ -202,6 +207,10 @@ Four major categories:
 - **Important**: If **"Using Location"** is not defined for the user, license assignment will fail
 - To define Using Location: Open user → **Edit Properties** → change **Using Location** in the form
 
+#### Password Reset (Self-Service Password Reset)
+- **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or lost
+- Configure who can use it (all users, selected users, or none) and required authentication methods
+
 #### Administrative Units
 - Used to segregate Active Directory for administrative purposes
 - Create boundaries within your tenant to delegate administrative permissions
@@ -224,3 +233,11 @@ Four major categories:
   - Who can access Entra ID (all users, selected users, or none)
   - Require MFA on register
   - Max devices per user
+
+### RBAC (Role-Based Access Control)
+- **Benefits**:
+  - **Level of abstraction**: Permissions are managed at the role level rather than individual user level
+  - **Simpler management**: Fewer errors due to centralized permission management
+  - **Consistent access**: All users with the same role are treated identically
+  - **Easier user onboarding**: New users can be quickly added to the system by assigning appropriate roles
+  - **Scalability**: Easy to manage permissions for large numbers of users
