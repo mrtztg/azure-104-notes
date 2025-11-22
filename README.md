@@ -143,14 +143,18 @@ Four major categories:
 
 ## 🔐 Entra ID
 
-### Basic Concepts of Accounts & Subscriptions
-
-#### Account / User
+### Account / User
 - **Person**: User account with username, password, and MFA (multi-factor authentication)
+  - Create a user from **Users** menu → **New User**
+  - By default, new users are created with the format `username@XXX.onmicrosoft.com` (e.g., `johndoe@example.onmicrosoft.com`)
+  - To use a custom domain, add it from the **Custom Domain Names** menu in Entra ID before creating users
+  - From the **Custom Domain Names** screen, you can make a custom domain primary
+  - With a custom domain, users can be created as `username@yourdomain.com` (e.g., `johndoe@example.com`)
+  - New users have no permissions by default, only the ability to login to the Azure portal
+- **User Groups**: Groups are an organizational structure for putting users in. If you enable **"Azure AD roles can be assigned to the group"** during group creation, you can assign roles to the group (which will apply to all users in the group). By choosing **"Dynamic User"** in Membership Type during group creation, you can create dynamic groups with rules (e.g., if display name contains something, or if department is something, etc.)
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
-- **User creation**: By default, new users are created with the format `username@XXX.onmicrosoft.com` (e.g., `johndoe@example.onmicrosoft.com`). To use a custom domain, add it from the **Custom Domain Names** menu in Entra ID before creating users. From the **Custom Domain Names** screen, you can make a custom domain primary. With a custom domain, users can be created as `username@yourdomain.com` (e.g., `johndoe@example.com`).
 
-#### Tenant
+### Tenant
 - A representation of an organization
 - Usually represented by a public domain name (e.g., `example.com`)
 - Will be assigned a domain if not specified (e.g., `example.onmicrosoft.com`)
@@ -163,12 +167,12 @@ Four major categories:
   - Navigate to **Entra ID → Manage Tenants**, select the desired tenant, and click **Switch**
   - Click your **profile picture** in the right corner → **Switch directory** → click **Switch** on the desired directory (tenant)
 
-#### Subscription
+### Subscription
 - An agreement with Microsoft to use Azure services and how to pay
 - All Azure resource usage gets billed to the payment method of the subscription
 - Types: Free subscription, Pay-As-You-Go (PAYG), Enterprise agreements
 
-#### Resource Group
+### Resource Group
 - Logical container for Azure resources
 - Resources within a resource group share the same lifecycle
 - Used for organizing, managing, and billing resources
@@ -182,3 +186,14 @@ Four major categories:
 - Shows all roles assigned to a user or group across the tenant
 - Common roles include: Global Administrator, User Administrator, Application Administrator, and custom roles
 - Used to verify permissions and troubleshoot access issues
+
+#### Licenses and Paid Features
+- Some Azure features are available only in paid plans (e.g., MFA for users, self-service password change)
+- If you have a paid license (like P2), you can enable those paid features for specific users
+- Better to enable only for users who need them, as paid features cost per person
+- To view licenses: Navigate to **Entra ID → Licenses** menu
+  - **All products**: Shows all available licenses
+  - **Licensed Features**: Shows features included in each license
+- To assign a license to users: **Users** menu → open user → **Licenses** (left menu) → **Assignments** (top) → assign licenses
+- **Important**: If **"Using Location"** is not defined for the user, license assignment will fail
+- To define Using Location: Open user → **Edit Properties** → change **Using Location** in the form
