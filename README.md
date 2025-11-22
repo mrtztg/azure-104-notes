@@ -197,3 +197,16 @@ Four major categories:
 - To assign a license to users: **Users** menu → open user → **Licenses** (left menu) → **Assignments** (top) → assign licenses
 - **Important**: If **"Using Location"** is not defined for the user, license assignment will fail
 - To define Using Location: Open user → **Edit Properties** → change **Using Location** in the form
+
+#### Administrative Units
+- Used to segregate Active Directory for administrative purposes
+- Create boundaries within your tenant to delegate administrative permissions
+- Can contain both users and groups
+- Unlike Roles (which are organization-wide), Administrative Units are scoped
+- Administrators assigned to an Administrative Unit can only manage users, groups, and devices within that unit
+- Allows for decentralized administration and scoped role assignments
+- Useful for large organizations with multiple departments or geographic locations
+- **Creation process**: During creation, in the **Assign Roles** screen, choose the desired roles and select the administrators. After creation, click **Add Member** and add users that should be in that scope
+- **Examples**:
+  - **Department-based**: Create an Administrative Unit for "Sales Department", add Sales users and groups to it, then assign a User Administrator role scoped to that unit - they can only manage users and groups in Sales
+  - **Geographic-based**: Create an Administrative Unit for "North America Region", add users and groups from that region, then assign administrators scoped to that unit - they can only manage resources in that region
