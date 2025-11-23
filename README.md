@@ -181,10 +181,18 @@ Four major categories:
 - All Azure resource usage gets billed to the payment method of the subscription
 - Types: Free subscription, Pay-As-You-Go (PAYG), Enterprise agreements
 
+### Resource
+- An entity managed by Azure
+- **Expected examples**: Virtual Machine (VM), web app, storage account
+- **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
+- Accounts can be given read, update, and owner rights to resources
+
 ### Resource Group
-- Logical container for Azure resources
-- Resources within a resource group share the same lifecycle
-- Used for organizing, managing, and billing resources
+- A way of organising resources in a subscription
+- Acts as a folder structure for resources
+- All resources must belong to only one resource group
+- Resource groups can be deleted (which deletes the resources inside)
+- A way to separate out projects, keeping unrelated things separate
 
 ![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
 
