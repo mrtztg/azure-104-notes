@@ -241,3 +241,83 @@ Four major categories:
   - **Consistent access**: All users with the same role are treated identically
   - **Easier user onboarding**: New users can be quickly added to the system by assigning appropriate roles
   - **Scalability**: Easy to manage permissions for large numbers of users
+
+#### Storage Authentication Methods
+- **Token-Based Access (CBAC - Claim Based Access Control)**:
+  - Default authentication method when "Default to Microsoft Entra Auth in Azure Portal" is disabled
+  - Access uses storage account keys (tokens)
+  - View keys: Storage account → **Security + Networking** → **Access Keys**
+  - Keys must be shared with applications or users who need access
+  - Less granular control compared to RBAC
+- **Role-Based Access (RBAC)**:
+  - Enabled by setting "Default to Microsoft Entra Auth in Azure Portal" to enabled
+  - Provides granular access control through Azure roles
+  - Recommended for better security and access management
+
+#### Enabling RBAC for Storage Accounts
+- **During creation**: Enable "Default to Microsoft Entra Auth in Azure Portal" option
+- **After creation**: Storage account → **Settings** → **Configurations** → Enable "Default to Microsoft Entra Auth in Azure Portal"
+- **Best practice**: After enabling RBAC, disable "Allow Storage account key access" to immediately block token-based access (unless applications still require key access)
+
+#### Resource Permissions vs Data Permissions
+- **Resource permissions**: Control management operations on the storage account (create, delete, modify settings, assign roles)
+  - Examples: Owner, Contributor, Reader roles
+  - Owner can manage everything but cannot read/write data by default
+  - Contributor can manage resources but cannot assign roles
+  - Reader can only view resource properties
+- **Data permissions**: Control access to data within storage (blobs, queues, tables, files)
+  - Examples: Storage Blob Data Owner, Storage Blob Data Contributor, Storage Blob Data Reader
+  - Separate from resource permissions
+  - Required to read/write data even if you have Owner role on the resource
+- **View your access**: Storage account → **IAM** → **View my access** button to see current permissions
+
+#### Storage Roles
+- **Resource management roles**:
+  - **Owner**: Full management access (manage everything, assign roles)
+  - **Contributor**: Manage resources but cannot assign roles
+  - **Reader**: Read-only access to resource properties
+- **Data access roles** (Storage-specific):
+  - **Storage Blob Data Owner**: Full access to blob containers and data (read, write, delete, manage)
+  - **Storage Blob Data Contributor**: Read, write, and delete blob data
+  - **Storage Blob Data Reader**: Read-only access to blob data
+  - Similar roles exist for Queues, Tables, and Files (e.g., Storage Queue Data Contributor)
+- **Role descriptions**: Check role descriptions in **IAM** → **Roles** tab to understand access levels
+
+#### Assigning Roles (Storage-Specific)
+- **Method 1**: Storage account → **IAM** → **Roles** tab → Select role checkbox → Click **Add role assignment** → Assign to user/group
+- **Method 2**: Storage account → **IAM** → **Add role assignment** button → Select role → Assign to user/group/service principal
+- **Scope inheritance**: Roles assigned at storage account level apply to all containers, queues, and tables within that account
+
+#### Custom Roles
+- **Creation location**: Subscription level → **IAM** → **Roles** → **+ Add** → **Add custom role**
+- **Creation options**:
+  - **Clone a role**: Start from an existing role that closely matches your needs, then modify permissions
+  - **Start from scratch**: Build a role from the ground up with specific permissions
+  - **Start from JSON**: Define the role using JSON format
+- **Assignable scopes**: Define where the custom role can be assigned during creation
+  - Can specify subscription(s), management group(s), or resource group(s)
+  - Limits the scope where this role can be used
+- **Limit**: Maximum of 5000 custom roles per tenant (avoid creating excessive custom roles)
+
+#### Resource Group Level Role Assignment
+- Assign roles at resource group level for environment-specific access (e.g., separate prod/dev resource groups)
+- Navigate to **Resource Groups** → Select resource group → **IAM** → Assign roles
+- Useful for granting access to specific environments without affecting other resource groups
+
+#### Permission Combination
+- **Cumulative permissions**: Role assignments are combined across different scopes
+- **Example**: User with "Storage Blob Data Reader" at storage level + "Storage Blob Data Contributor" at resource group level = User has delete permission (union of all permissions)
+
+#### Viewing Access Assignments
+- **Method 1**: Resource group → **IAM** → View role assignments for that resource group
+- **Method 2**: Entra ID → **Users** → Open user → Check both:
+  - **Assigned Roles**: Entra ID roles (e.g., Global Administrator, User Administrator)
+  - **Azure role assignments**: Azure RBAC role assignments across subscriptions, resource groups, and resources
+
+#### Container-Level Role Assignment
+- **Container-specific permissions**: Open container → **IAM** (left menu) → Assign roles from this screen
+- **Scope**: Role assignments at container level affect only that specific container, not all containers in the storage account
+- **Inheritance**: Storage-level role assignments are inherited by all containers, but container-level assignments override for that specific container
+- **Access method switch**: When viewing container data (**Data Storage** → container), toggle switch at top of page to switch between:
+  - **Access key**: Uses storage account keys (token-based)
+  - **IAM role**: Uses assigned RBAC roles
