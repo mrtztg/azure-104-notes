@@ -180,6 +180,8 @@ Four major categories:
 - An agreement with Microsoft to use Azure services and how to pay
 - All Azure resource usage gets billed to the payment method of the subscription
 - Types: Free subscription, Pay-As-You-Go (PAYG), Enterprise agreements
+- Every subscription can be assigned to ONLY one tenant, but each tenant cant have multiple subscriptions.
+- To change tenant of a subscription, open the subscription, and use "change directory" button on top.
 
 ### Resource
 - An entity managed by Azure
