@@ -203,6 +203,11 @@ Four major categories:
 - Resource groups can be deleted (which deletes the resources inside)
 - A way to separate out projects, keeping unrelated things separate
 
+### 🔒 Resource Lock
+- Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
+- Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
+- These locks help protect critical resources from accidental deletion or modification
+
 ![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
 
 ### Entra ID Management
