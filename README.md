@@ -184,6 +184,10 @@ Four major categories:
 - To change tenant of a subscription, open the subscription, and use "Change directory" button on top.
 - From **IAM** menu, we can define who can have access to this subscription (e.g., see invoices and billings, forecasts, etc.)
 - From **Cost Management > Cost Analysis** menu, we can see details of the costs like which services cost how much
+- **Cost Management > Cost Alert** is for setting up cost alerts. From top of the page, click **Add > Add Budget**
+- There is also **Add Anomaly alert**, which is defined by Azure itself (e.g., for new charges that were not there before, or charges were there and now stopped, or significant changes on cost). Alert sent as email
+- **Cost Management > Budgets**: Define budget, reset budget reset period, when to receive the alert (threshold percentage)
+- **Cost Management > Advisor Recommendations**: Gives recommendations across number of categories like cost
 - In **Settings > Usage + Quotas** menu, we can see different limitations of how much compute in different regions. Under "Adjustable" column, for the ones that are "yes", we can click on pen button and ask for change
 
 ### Resource
