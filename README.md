@@ -181,7 +181,10 @@ Four major categories:
 - All Azure resource usage gets billed to the payment method of the subscription
 - Types: Free subscription, Pay-As-You-Go (PAYG), Enterprise agreements
 - Every subscription can be assigned to ONLY one tenant, but each tenant cant have multiple subscriptions.
-- To change tenant of a subscription, open the subscription, and use "change directory" button on top.
+- To change tenant of a subscription, open the subscription, and use "Change directory" button on top.
+- From **IAM** menu, we can define who can have access to this subscription (e.g., see invoices and billings, forecasts, etc.)
+- From **Cost Management > Cost Analysis** menu, we can see details of the costs like which services cost how much
+- In **Settings > Usage + Quotas** menu, we can see different limitations of how much compute in different regions. Under "Adjustable" column, for the ones that are "yes", we can click on pen button and ask for change
 
 ### Resource
 - An entity managed by Azure
