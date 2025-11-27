@@ -132,6 +132,15 @@ Four major categories:
   - **Cool**: Infrequent access (30+ days retention), lower storage cost, higher access cost
   - **Cold**: Rarely accessed (90+ days retention), even lower storage cost, even higher access cost
 
+**Networking Tab Settings:**
+- **Network access**:
+  - **Enable public access from all networks**: Accessible from internet, but access key still required for authentication
+  - **Enable public access from selected virtual networks and IP addresses**: Restricts access to specific VNets and IP ranges (use case: allow only corporate network or specific Azure resources)
+  - **Disable public access and use private access**: Create private endpoint in VNet, resources (e.g., VMs) access storage through secure private endpoint instead of public internet (most secure)
+- **Routing preference**:
+  - **Microsoft network routing**: Traffic routed through Microsoft's global network (better performance, slightly higher cost)
+  - **Internet routing**: Traffic routed through public internet (lower cost, may have higher latency)
+
 - **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
 
 #### Data Services
