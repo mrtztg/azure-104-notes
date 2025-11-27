@@ -115,6 +115,28 @@ Four major categories:
 - **Azure Database for PostgreSQL Flexible Server**: Managed PostgreSQL with flexible compute and storage scaling, supports zone-redundant high availability
 - **Azure Synapse Analytics**: Analytics service combining data warehousing and big data analytics (formerly SQL Data Warehouse)
 
+### Resource
+- An entity managed by Azure
+- **Expected examples**: Virtual Machine (VM), web app, storage account
+- **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
+- Accounts can be given read, update, and owner rights to resources
+
+### Resource Group
+- A way of organising resources in a subscription
+- Acts as a folder structure for resources
+- All resources must belong to only one resource group
+- Resource groups can be deleted (which deletes the resources inside)
+- A way to separate out projects, keeping unrelated things separate
+
+### Moving Resources
+- Resources can be moved between resource groups, subscriptions, or regions
+- Navigate to resource group → Select resources → **Move** button (top menu)
+- Move options: Move to another resource group, Move to another subscription, Move to another region
+- **Important**: Some resources cannot be moved (e.g., certain networking resources, classic resources)
+- Azure validates move compatibility before allowing the operation
+
+![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
+
 ## 💻 CLI and PowerShell
 
 > **Exam Tip**: Leave enough time for performance-based CLI tasks in the exam.
@@ -189,21 +211,6 @@ Four major categories:
 - **Cost Management > Budgets**: Define budget, reset budget reset period, when to receive the alert (threshold percentage)
 - **Cost Management > Advisor Recommendations**: Gives recommendations across number of categories like cost
 - In **Settings > Usage + Quotas** menu, we can see different limitations of how much compute in different regions. Under "Adjustable" column, for the ones that are "yes", we can click on pen button and ask for change
-
-### Resource
-- An entity managed by Azure
-- **Expected examples**: Virtual Machine (VM), web app, storage account
-- **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
-- Accounts can be given read, update, and owner rights to resources
-
-### Resource Group
-- A way of organising resources in a subscription
-- Acts as a folder structure for resources
-- All resources must belong to only one resource group
-- Resource groups can be deleted (which deletes the resources inside)
-- A way to separate out projects, keeping unrelated things separate
-
-![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
 
 ### Entra ID Management
 
@@ -340,6 +347,14 @@ Four major categories:
   - **IAM role**: Uses assigned RBAC roles
 
 ## 🛡️ Governance & Compliance
+
+### 🏷️ Tags
+- Key-value pair metadata applied to Azure resources for organization and management
+- Can be applied to resources, resource groups, and subscriptions
+- Common uses: cost tracking, environment identification (prod/dev), ownership, automation
+- Apply tags via resource **Settings → Tags** menu or during resource creation
+- **Important**: Tags are NOT inherited from resource groups to resources by default
+- Use Azure Policy to enforce tagging requirements or automatically apply tags
 
 ### 🔒 Resource Lock
 - Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
