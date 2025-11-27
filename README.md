@@ -134,12 +134,26 @@ Four major categories:
 
 **Networking Tab Settings:**
 - **Network access**:
-  - **Enable public access from all networks**: Accessible from internet, but access key still required for authentication
-  - **Enable public access from selected virtual networks and IP addresses**: Restricts access to specific VNets and IP ranges (use case: allow only corporate network or specific Azure resources)
-  - **Disable public access and use private access**: Create private endpoint in VNet, resources (e.g., VMs) access storage through secure private endpoint instead of public internet (most secure)
+  - **Enable**: Public access enabled (access key still required)
+    - **Enable for all networks**: Accessible from internet
+    - **Enable for selected virtual networks and IP addresses**: Restrict to specific VNets and IP ranges (use case: corporate network or specific Azure resources)
+  - **Disable**: No public access, requires private endpoints
+  - **Secured by Perimeter** (Most restricted): Strictest security, only accessible through configured security perimeter
 - **Routing preference**:
-  - **Microsoft network routing**: Traffic routed through Microsoft's global network (better performance, slightly higher cost)
-  - **Internet routing**: Traffic routed through public internet (lower cost, may have higher latency)
+  - **Microsoft network routing**: Traffic through Microsoft's global network (better performance, slightly higher cost)
+  - **Internet routing**: Traffic through public internet (lower cost, may have higher latency)
+
+**Data Protection Tab Settings:**
+- **Recovery** (prevent accidental or malicious data loss):
+  - **Enable point-in-time restore for containers**: Restore blob data to earlier state within retention period (requires versioning, change feed, and blob soft delete enabled)
+  - **Enable soft delete for blobs**: Retain deleted blobs for specified days (can recover within retention period)
+  - **Enable soft delete for containers**: Retain deleted containers for specified days
+  - **Enable soft delete for file shares**: Retain deleted file shares for specified days
+- **Tracking**:
+  - **Enable versioning for blobs**: Maintains previous versions of blobs when modified or deleted
+  - **Enable blob change feed**: Logs all changes to blobs (creates, modifications, deletions) for auditing and compliance
+- **Access control**:
+  - **Enable version-level immutability support**: Prevents files from deletion or modification (WORM - Write Once Read Many). Use case: Store access logs that cannot be deleted, even if hacker gains access and attempts to erase their activity traces
 
 - **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
 
