@@ -349,6 +349,7 @@ Four major categories:
 ### 📋 Azure Policy
 - Service for defining and enforcing governance rules at subscription or resource group level
 - Azure provides hundreds of built-in policies ready to use
+- During resource creation, **Review + Create** step validates against assigned policies
 
 #### Finding and Assigning Built-in Policies
 - Navigate to **Policy** service → **Authoring → Definitions**
@@ -360,6 +361,69 @@ Four major categories:
 - **Policy**: Single policy definition with specific rule
 - **Initiative**: Collection of multiple policies grouped together
 - Can create custom policy or initiative definitions
+
+#### Creating Custom Policy Definitions
+- Copy JSON from built-in policies to learn structure and syntax
+- **Finding resource property keys**: Create resource (e.g., storage) → **Review + Create** → **Download a template for automation** or **View automation template** to see JSON keys
+- **Role definitions**: If policy requires permissions (e.g., for "DeployIfNotExists" or "Modify" effects), specify required role definitions during policy creation to grant necessary permissions
+
+**Basic policy template:**
+```json
+{
+  "mode": "All",  // "All" applies to all resource types, "Indexed" applies to resources that support tags and location
+  "policyRule": {
+    "if": {  // Condition to evaluate
+      "field": "<resource-property-key>",  // Property to check (e.g., "type", "location")
+      "equals": "<value>"  // Value to match
+    },
+    "then": {  // Action to take if condition is true
+      "effect": "[parameters('effect')]"  // References parameter below
+    }
+  },
+  "parameters": {  // Define configurable parameters for flexibility
+    "effect": {
+      "type": "String",
+      "allowedValues": ["<option1>", "<option2>"],  // Options like "Deny", "Audit", "Disabled"
+      "defaultValue": "<default-option>"
+    }
+  }
+}
+```
+
+**Example - Require HTTPS for Storage Accounts:**
+```json
+{
+  "mode": "All",
+  "policyRule": {
+    "if": {
+      "allOf": [  // All conditions must be true
+        {
+          "field": "type",  // Check resource type
+          "equals": "Microsoft.Storage/storageAccounts"
+        },
+        {
+          "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",  // Check HTTPS property
+          "notEquals": "true"  // If HTTPS is NOT enabled
+        }
+      ]
+    },
+    "then": {
+      "effect": "[parameters('effect')]"  // Apply deny or disabled effect
+    }
+  },
+  "parameters": {
+    "effect": {
+      "type": "String",
+      "allowedValues": ["Deny", "Disabled"],  // Either block creation or just disable policy
+      "defaultValue": "Deny",  // Default: prevent non-HTTPS storage accounts
+      "metadata": {
+        "displayName": "Effect",
+        "description": "Enable or disable the execution of the policy"
+      }
+    }
+  }
+}
+```
 
 #### Viewing Assignments
 - **Authoring → Assignments**: View all assigned policies, their scopes, and compliance status
