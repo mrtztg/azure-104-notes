@@ -203,11 +203,6 @@ Four major categories:
 - Resource groups can be deleted (which deletes the resources inside)
 - A way to separate out projects, keeping unrelated things separate
 
-### 🔒 Resource Lock
-- Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
-- Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
-- These locks help protect critical resources from accidental deletion or modification
-
 ![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
 
 ### Entra ID Management
@@ -343,3 +338,28 @@ Four major categories:
 - **Access method switch**: When viewing container data (**Data Storage** → container), toggle switch at top of page to switch between:
   - **Access key**: Uses storage account keys (token-based)
   - **IAM role**: Uses assigned RBAC roles
+
+## 🛡️ Governance & Compliance
+
+### 🔒 Resource Lock
+- Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
+- Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
+- These locks help protect critical resources from accidental deletion or modification
+
+### 📋 Azure Policy
+- Service for defining and enforcing governance rules at subscription or resource group level
+- Azure provides hundreds of built-in policies ready to use
+
+#### Finding and Assigning Built-in Policies
+- Navigate to **Policy** service → **Authoring → Definitions**
+- Search by keyword (e.g., "Allowed locations"), click to view JSON definition
+- Assign to desired scope (subscription, management group, or resource group)
+- Fill predefined parameters (e.g., allowed regions) and custom non-compliance message
+
+#### Definition Types
+- **Policy**: Single policy definition with specific rule
+- **Initiative**: Collection of multiple policies grouped together
+- Can create custom policy or initiative definitions
+
+#### Viewing Assignments
+- **Authoring → Assignments**: View all assigned policies, their scopes, and compliance status
