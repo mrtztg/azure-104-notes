@@ -104,6 +104,36 @@ Four major categories:
   - **Managed Disks**: Azure handles storage accounts, high scalability/reliability, easier to manage
   - **Unmanaged Disks**: User manages storage accounts, legacy usage only
 
+#### Storage Account Creation Considerations
+- **Storage account name**: Must be globally unique across all of Azure (3-24 characters, lowercase letters and numbers only)
+- **Region selection**: Consider three factors:
+  - Distance from users (lower latency)
+  - Region-limited features (not all features available in all regions)
+  - Cost (pricing varies by region)
+- **Performance tiers**:
+  - **Standard**: Lower storage cost, higher transaction/operation cost
+  - **Premium**: Higher storage cost, lower read operation cost (better for high-transaction workloads)
+- **Redundancy options** (some regions may not support all options):
+  - **LRS (Locally Redundant Storage)**: 3 copies within single data center (Microsoft maintains 2 additional copies as disks fail over time)
+  - **ZRS (Zone-Redundant Storage)**: 3 copies across availability zones within a region
+  - **GRS (Geo-Redundant Storage)**: 6 copies across 2 regions (3 in primary, 3 in secondary)
+    - Checkbox: **"Make read access to data available in the event of regional unavailability"** enables RA-GRS (slightly higher cost)
+    - Checkbox: **"Geo priority replication guarantees Blob storage data is geo-replicated within 15 minutes"**
+  - **GZRS (Geo-Zone-Redundant Storage)**: Safest option, combines ZRS and GRS
+
+**Advanced Tab Settings:**
+- **Security**:
+  - **"Require secure transfer for REST API operations"**: Disables HTTP access, allows only HTTPS
+  - **"Allow enabling anonymous access on individual containers"**: Check only when files need to be publicly accessible (e.g., website assets like videos, JS, CSS files)
+  - **"Enable storage account key access"**: Allows key-based authentication (disable to enforce Entra ID only)
+  - **"Default to Microsoft Entra Authentication in the Azure portal"**: Uses Entra ID (RBAC) instead of storage keys
+- **Blob storage access tiers** (default tier for new blobs, can be set per file):
+  - **Hot**: Frequent access, optimized for data accessed regularly, higher storage cost, lower access cost
+  - **Cool**: Infrequent access (30+ days retention), lower storage cost, higher access cost
+  - **Cold**: Rarely accessed (90+ days retention), even lower storage cost, even higher access cost
+
+- **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
+
 #### Data Services
 - **SQL Services**:
   - **Azure SQL Database**: Managed relational database (PaaS), serverless and provisioned tiers
@@ -114,6 +144,28 @@ Four major categories:
   - **Azure Table Storage**: NoSQL key-value store (part of Azure Storage)
 - **Azure Database for PostgreSQL Flexible Server**: Managed PostgreSQL with flexible compute and storage scaling, supports zone-redundant high availability
 - **Azure Synapse Analytics**: Analytics service combining data warehousing and big data analytics (formerly SQL Data Warehouse)
+
+### Resource
+- An entity managed by Azure
+- **Expected examples**: Virtual Machine (VM), web app, storage account
+- **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
+- Accounts can be given read, update, and owner rights to resources
+
+### Resource Group
+- A way of organising resources in a subscription
+- Acts as a folder structure for resources
+- All resources must belong to only one resource group
+- Resource groups can be deleted (which deletes the resources inside)
+- A way to separate out projects, keeping unrelated things separate
+
+### Moving Resources
+- Resources can be moved between resource groups, subscriptions, or regions
+- Navigate to resource group → Select resources → **Move** button (top menu)
+- Move options: Move to another resource group, Move to another subscription, Move to another region
+- **Important**: Some resources cannot be moved (e.g., certain networking resources, classic resources)
+- Azure validates move compatibility before allowing the operation
+
+![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
 
 ## 💻 CLI and PowerShell
 
@@ -140,6 +192,34 @@ Four major categories:
 - Switch between subscriptions:
   - List subscriptions: `Get-AzSubscription`
   - Set context: `Set-AzContext -Subscription "subscription-id"`
+
+#### Automation and Common Operations
+- PowerShell enables automation of Azure tasks through scripting
+- Store resource information in variables for reuse
+
+**Working with Resource Groups:**
+```powershell
+# Get resource group and store in variable
+$rg = Get-AzResourceGroup -Name '<resource-group-name>' -Location '<location>'
+
+# Access properties
+$rg.ResourceGroupName
+$rg.Location
+$rg.ResourceId
+```
+
+**Assigning Policy to Resource Group:**
+```powershell
+# Step 1: Find policy in Azure Portal → Policy → Definitions → Copy Definition ID
+# Step 2: Get policy definition by ID
+$definition = Get-AzPolicyDefinition -Id '<definition-id-from-portal>'
+
+# Step 3: Assign policy to resource group
+New-AzPolicyAssignment -Scope $rg.ResourceId `
+                       -PolicyDefinition $definition `
+                       -Name 'RGLocationMatch' `
+                       -DisplayName 'Enforce resource group location policy'
+```
 
 ## 🔐 Entra ID
 
@@ -176,6 +256,22 @@ Four major categories:
   - Navigate to **Entra ID → Manage Tenants**, select the desired tenant, and click **Switch**
   - Click your **profile picture** in the right corner → **Switch directory** → click **Switch** on the desired directory (tenant)
 
+### Management Groups
+- Containers for organizing subscriptions within a tenant for governance at scale
+- Hierarchy: Tenant → Management Groups → Subscriptions → Resource Groups → Resources
+- Each tenant has a **Root Management Group** at the top level
+- Can create **child management groups** under the root or under other management groups (up to 6 levels deep)
+
+#### Creating Child Management Groups
+- Navigate to **Management Groups** service → **Create** (or select parent group → **Add management group**)
+- Specify parent management group (defaults to root)
+- Assign subscriptions to management groups for organizational structure
+
+#### Inheritance and Benefits
+- **Policy inheritance**: Policies assigned to parent management group automatically apply to all child management groups and subscriptions
+- **RBAC inheritance**: Role assignments at management group level inherited by child groups and subscriptions
+- **Benefits**: Centralized governance across multiple subscriptions, apply policies/RBAC once at scale instead of per subscription
+
 ### Subscription
 - An agreement with Microsoft to use Azure services and how to pay
 - All Azure resource usage gets billed to the payment method of the subscription
@@ -189,21 +285,6 @@ Four major categories:
 - **Cost Management > Budgets**: Define budget, reset budget reset period, when to receive the alert (threshold percentage)
 - **Cost Management > Advisor Recommendations**: Gives recommendations across number of categories like cost
 - In **Settings > Usage + Quotas** menu, we can see different limitations of how much compute in different regions. Under "Adjustable" column, for the ones that are "yes", we can click on pen button and ask for change
-
-### Resource
-- An entity managed by Azure
-- **Expected examples**: Virtual Machine (VM), web app, storage account
-- **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
-- Accounts can be given read, update, and owner rights to resources
-
-### Resource Group
-- A way of organising resources in a subscription
-- Acts as a folder structure for resources
-- All resources must belong to only one resource group
-- Resource groups can be deleted (which deletes the resources inside)
-- A way to separate out projects, keeping unrelated things separate
-
-![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
 
 ### Entra ID Management
 
@@ -340,6 +421,14 @@ Four major categories:
   - **IAM role**: Uses assigned RBAC roles
 
 ## 🛡️ Governance & Compliance
+
+### 🏷️ Tags
+- Key-value pair metadata applied to Azure resources for organization and management
+- Can be applied to resources, resource groups, and subscriptions
+- Common uses: cost tracking, environment identification (prod/dev), ownership, automation
+- Apply tags via resource **Settings → Tags** menu or during resource creation
+- **Important**: Tags are NOT inherited from resource groups to resources by default
+- Use Azure Policy to enforce tagging requirements or automatically apply tags
 
 ### 🔒 Resource Lock
 - Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
