@@ -163,6 +163,34 @@ Four major categories:
   - List subscriptions: `Get-AzSubscription`
   - Set context: `Set-AzContext -Subscription "subscription-id"`
 
+#### Automation and Common Operations
+- PowerShell enables automation of Azure tasks through scripting
+- Store resource information in variables for reuse
+
+**Working with Resource Groups:**
+```powershell
+# Get resource group and store in variable
+$rg = Get-AzResourceGroup -Name '<resource-group-name>' -Location '<location>'
+
+# Access properties
+$rg.ResourceGroupName
+$rg.Location
+$rg.ResourceId
+```
+
+**Assigning Policy to Resource Group:**
+```powershell
+# Step 1: Find policy in Azure Portal → Policy → Definitions → Copy Definition ID
+# Step 2: Get policy definition by ID
+$definition = Get-AzPolicyDefinition -Id '<definition-id-from-portal>'
+
+# Step 3: Assign policy to resource group
+New-AzPolicyAssignment -Scope $rg.ResourceId `
+                       -PolicyDefinition $definition `
+                       -Name 'RGLocationMatch' `
+                       -DisplayName 'Enforce resource group location policy'
+```
+
 ## 🔐 Entra ID
 
 ### Account / User
