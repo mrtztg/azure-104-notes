@@ -155,6 +155,25 @@ Four major categories:
 - **Access control**:
   - **Enable version-level immutability support**: Prevents files from deletion or modification (WORM - Write Once Read Many). Use case: Store access logs that cannot be deleted, even if hacker gains access and attempts to erase their activity traces
 
+**Encryption Tab Settings:**
+- **Encryption types**:
+  - **MMK (Microsoft-Managed Keys)**: Default option, Microsoft manages and rotates encryption keys automatically
+  - **CMK (Customer-Managed Keys)**: Customer controls encryption keys for greater security and compliance
+- **Enable support for customer-managed keys** (available regardless of encryption type):
+  - Scope options:
+    - Blobs and files only
+    - All service types (blobs, files, tables, and queues)
+  - **Encryption key** source:
+    - From URI: Specify key URI directly
+    - From Key Vault: Select key from Azure Key Vault
+- **Enhanced security**:
+  - **Enable infrastructure encryption**: Adds second layer of encryption at infrastructure level (double encryption for highly sensitive data)
+
+**Review + Create:**
+- Review all configuration settings across all tabs
+- Azure validates the configuration (checks policies, naming, quotas)
+- Click **Create** to deploy the storage account
+
 - **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
 
 #### Data Services
