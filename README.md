@@ -1,25 +1,4 @@
 # ☁️ azure-104-notes
-## 💰 Cost centre
-
-### 💵 Setting Cost Budgets in Azure
-
-To set cost budgets in Azure:
-
-1. Navigate to **Cost Management + Billing** in the Azure portal.
-2. Select **Budgets** from the left menu.
-3. Click **+ Add** to create a new budget.
-4. Configure the budget:
-   - **Scope**: Select the subscription, resource group, or management group.
-   - **Budget name**: Give it a descriptive name.
-   - **Reset period**: Monthly, Quarterly, or Annually.
-   - **Budget amount**: Set the spending limit.
-5. Set **Alert conditions** (optional):
-   - Configure alerts at different thresholds (e.g., 50%, 75%, 90%, 100%).
-   - Add email recipients or action groups for notifications. In **Manage Action Groups**, you can define automated actions to take place when a budget threshold is reached (such as **running an automation**, **sending SMS**, **stop all VMs**, or **triggering webhooks**).
-6. Click **Create** to save the budget.
-
-Budgets help monitor and control spending by sending alerts and taking automated actions when thresholds are reached.
-
 ## 🏗️ Azure Concepts
 
 > **Note**: Not everything in this section will appear on the AZ-104 exam. This is an overview of Azure services.
@@ -117,8 +96,8 @@ Four major categories:
   - **LRS (Locally Redundant Storage)**: 3 copies within single data center (Microsoft maintains 2 additional copies as disks fail over time)
   - **ZRS (Zone-Redundant Storage)**: 3 copies across availability zones within a region
   - **GRS (Geo-Redundant Storage)**: 6 copies across 2 regions (3 in primary, 3 in secondary)
-    - Checkbox: **"Make read access to data available in the event of regional unavailability"** enables RA-GRS (slightly higher cost)
-    - Checkbox: **"Geo priority replication guarantees Blob storage data is geo-replicated within 15 minutes"**
+    - **"Make read access to data available in the event of regional unavailability"**: Enables RA-GRS (slightly higher cost)
+    - **"Geo priority replication guarantees Blob storage data is geo-replicated within 15 minutes"**
   - **GZRS (Geo-Zone-Redundant Storage)**: Safest option, combines ZRS and GRS
 
 **Advanced Tab Settings:**
@@ -176,6 +155,14 @@ Four major categories:
 
 - **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
 
+#### Blob Containers and Management
+- **Containers**: Organize blobs within storage account (like folders/boxes to put blobs in)
+- **Blob access tiers**: Can be set during file upload or changed later from top menu:
+  - **Hot**: Frequent access
+  - **Cool**: Infrequent access (30+ days)
+  - **Cold**: Rarely accessed (90+ days)
+  - **Archive**: Long-term archival storage, lowest cost, but data must be rehydrated before access (not available as default during storage account creation)
+
 #### Data Services
 - **SQL Services**:
   - **Azure SQL Database**: Managed relational database (PaaS), serverless and provisioned tiers
@@ -187,20 +174,20 @@ Four major categories:
 - **Azure Database for PostgreSQL Flexible Server**: Managed PostgreSQL with flexible compute and storage scaling, supports zone-redundant high availability
 - **Azure Synapse Analytics**: Analytics service combining data warehousing and big data analytics (formerly SQL Data Warehouse)
 
-### Resource
+### 🧩 Resource
 - An entity managed by Azure
 - **Expected examples**: Virtual Machine (VM), web app, storage account
 - **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
 - Accounts can be given read, update, and owner rights to resources
 
-### Resource Group
+### 📂 Resource Group
 - A way of organising resources in a subscription
 - Acts as a folder structure for resources
 - All resources must belong to only one resource group
-- Resource groups can be deleted (which deletes the resources inside)
+- Deleting a resource group also deletes all resources within it
 - A way to separate out projects, keeping unrelated things separate
 
-### Moving Resources
+### 🚚 Moving Resources
 - Resources can be moved between resource groups, subscriptions, or regions
 - Navigate to resource group → Select resources → **Move** button (top menu)
 - Move options: Move to another resource group, Move to another subscription, Move to another region
@@ -208,6 +195,27 @@ Four major categories:
 - Azure validates move compatibility before allowing the operation
 
 ![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
+
+## 💰 Cost centre
+
+### 💵 Setting Cost Budgets in Azure
+
+To set cost budgets in Azure:
+
+1. Navigate to **Cost Management + Billing** in the Azure portal.
+2. Select **Budgets** from the left menu.
+3. Click **+ Add** to create a new budget.
+4. Configure the budget:
+   - **Scope**: Select the subscription, resource group, or management group.
+   - **Budget name**: Give it a descriptive name.
+   - **Reset period**: Monthly, Quarterly, or Annually.
+   - **Budget amount**: Set the spending limit.
+5. Set **Alert conditions** (optional):
+   - Configure alerts at different thresholds (e.g., 50%, 75%, 90%, 100%).
+   - Add email recipients or action groups for notifications. In **Manage Action Groups**, you can define automated actions to take place when a budget threshold is reached (such as **running an automation**, **sending SMS**, **stop all VMs**, or **triggering webhooks**).
+6. Click **Create** to save the budget.
+
+Budgets help monitor and control spending by sending alerts and taking automated actions when thresholds are reached.
 
 ## 💻 CLI and PowerShell
 
@@ -293,7 +301,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Every Azure account is part of at least one tenant
 - Each tenant can have any number of subscriptions (even 0)
 - More than one account can be the owner in a tenant
-- **Creating a new tenant**: If your account is not a global administrator (e.g., on dev plans), create a new Entra ID tenant via **Entra ID dashboard → Manage Tenants → Create Microsoft Entra ID** to gain necessary access. Now, this tenant will be yours.
+- **Creating a new tenant**: If your account is not a global administrator (e.g., on dev plans), create a new Entra ID tenant via **Entra ID dashboard → Manage Tenants → Create a new tenant** to gain necessary access. Now, this tenant will be yours.
 - **Switching tenants**: You can switch between tenants (e.g., from your company's tenant where you're a developer to your own tenant where you're a global administrator). Two methods:
   - Navigate to **Entra ID → Manage Tenants**, select the desired tenant, and click **Switch**
   - Click your **profile picture** in the right corner → **Switch directory** → click **Switch** on the desired directory (tenant)
@@ -318,7 +326,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - An agreement with Microsoft to use Azure services and how to pay
 - All Azure resource usage gets billed to the payment method of the subscription
 - Types: Free subscription, Pay-As-You-Go (PAYG), Enterprise agreements
-- Every subscription can be assigned to ONLY one tenant, but each tenant cant have multiple subscriptions.
+- Every subscription can be assigned to ONLY one tenant, but each tenant **can** have multiple subscriptions.
 - To change tenant of a subscription, open the subscription, and use "Change directory" button on top.
 - From **IAM** menu, we can define who can have access to this subscription (e.g., see invoices and billings, forecasts, etc.)
 - From **Cost Management > Cost Analysis** menu, we can see details of the costs like which services cost how much
