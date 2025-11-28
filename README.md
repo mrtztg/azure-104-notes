@@ -402,6 +402,25 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Provides granular access control through Azure roles
   - Recommended for better security and access management
 
+#### Storage Access Keys
+- **Two access keys** (key1 and key2) provide full access to storage account and all data
+- **Why two keys**: Enables key rotation without downtime
+  - Applications use key1 → Regenerate key2 → Switch apps to key2 → Regenerate key1
+- **Location**: Storage account → **Security + Networking** → **Access Keys**
+- **Security**: Access keys are like root passwords - store securely (Azure Key Vault), rotate regularly
+
+#### Shared Access Signature (SAS)
+- URI token granting restricted access to storage resources
+- **Benefits**: Granular control (specific resources, permissions, time period) vs full access with keys
+- **SAS Types**:
+  - **User Delegation SAS**: Secured with Entra ID (most secure)
+  - **Service SAS**: Access to specific service (Blob, Queue, Table, File)
+  - **Account SAS**: Access to multiple services
+- **Key parameters**: Permissions, expiry time, allowed IPs, HTTPS-only protocol
+- **Creating SAS**: Container → **Shared access tokens** or Storage account → **Shared access signature**
+- **Revoking SAS**: Cannot revoke individual SAS tokens after creation - only way to invalidate is by regenerating the access key that was used to create it (revokes all SAS tokens created with that key)
+- **Best practices**: Use shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
+
 #### Enabling RBAC for Storage Accounts
 - **During creation**: Enable "Default to Microsoft Entra Auth in Azure Portal" option
 - **After creation**: Storage account → **Settings** → **Configurations** → Enable "Default to Microsoft Entra Auth in Azure Portal"
