@@ -416,10 +416,26 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **User Delegation SAS**: Secured with Entra ID (most secure)
   - **Service SAS**: Access to specific service (Blob, Queue, Table, File)
   - **Account SAS**: Access to multiple services
-- **Key parameters**: Permissions, expiry time, allowed IPs, HTTPS-only protocol
-- **Creating SAS**: Container → **Shared access tokens** or Storage account → **Shared access signature**
-- **Revoking SAS**: Cannot revoke individual SAS tokens after creation - only way to invalidate is by regenerating the access key that was used to create it (revokes all SAS tokens created with that key)
-- **Best practices**: Use shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
+- **Creating SAS**:
+  - **Container level**: Container → **Shared access tokens**
+  - **Blob level**: Open blob → **Generate SAS** (from top menu or right-click context menu)
+  - **Storage account level**: Storage account → **Shared access signature**
+- **SAS Configuration Parameters**:
+  - **Signing key**: Choose which access key to use (key1 or key2)
+  - **Permissions**: Read, Write, Delete, List, Add, Create, Update, Process (select only needed)
+  - **Start date/time**: When SAS becomes valid
+  - **Expiry date/time**: When SAS expires
+  - **Allowed IP addresses**: Restrict to specific IP ranges
+  - **Allowed protocols**: HTTPS only (recommended) or HTTP and HTTPS
+  - **Stored access policy**: Reference to predefined access policy (optional)
+- **Stored Access Policy**:
+  - Created at container level: Container → **Settings** → **Access policy** → **Add policy**
+  - Define permissions, start/expiry times centrally in the policy
+  - When generating SAS, select the stored access policy instead of defining parameters directly
+  - **Benefits**: Centralized management - modify or revoke permissions for all SAS tokens using that policy without regenerating access keys
+  - **Revoking**: Delete or modify the stored access policy to immediately affect all associated SAS tokens
+- **Revoking SAS without Stored Access Policy**: Cannot revoke individual SAS tokens - only way is regenerating the access key used to create it (revokes all SAS tokens created with that key)
+- **Best practices**: Use stored access policies for easier management, shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
 
 #### Enabling RBAC for Storage Accounts
 - **During creation**: Enable "Default to Microsoft Entra Auth in Azure Portal" option
