@@ -82,6 +82,7 @@ Four major categories:
 - Managed vs. Unmanaged Disks:
   - **Managed Disks**: Azure handles storage accounts, high scalability/reliability, easier to manage
   - **Unmanaged Disks**: User manages storage accounts, legacy usage only
+- **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
 
 #### Storage Account Creation Considerations
 - **Storage account name**: Must be globally unique across all of Azure (3-24 characters, lowercase letters and numbers only)
@@ -153,8 +154,6 @@ Four major categories:
 - Azure validates the configuration (checks policies, naming, quotas)
 - Click **Create** to deploy the storage account
 
-- **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
-
 #### Blob Containers and Management
 - **Containers**: Organize blobs within storage account (like folders/boxes to put blobs in)
 - **Blob access tiers**: Can be set during file upload or changed later from top menu:
@@ -163,7 +162,102 @@ Four major categories:
   - **Cold**: Rarely accessed (90+ days)
   - **Archive**: Long-term archival storage, lowest cost, but data must be rehydrated before access (not available as default during storage account creation)
 
-#### Data Services
+#### Storage Authentication Methods
+- **Token-Based Access (Access Keys)**:
+  - Access uses storage account keys (tokens)
+  - View keys: Storage account → **Security + Networking** → **Access Keys**
+  - Keys must be shared with applications or users who need access
+  - Less granular control compared to RBAC
+- **Role-Based Access (RBAC)**:
+  - Access through Azure Entra ID roles (IAM)
+  - Provides granular access control through Azure roles
+  - Recommended for better security and access management
+- **Default to Microsoft Entra Auth in Azure Portal**: Controls which method the Azure Portal uses by default when you access storage (doesn't disable either method)
+
+#### Storage Access Keys
+- **Two access keys** (key1 and key2) provide full access to storage account and all data
+- **Why two keys**: Enables key rotation without downtime
+  - Applications use key1 → Regenerate key2 → Switch apps to key2 → Regenerate key1
+- **Location**: Storage account → **Security + Networking** → **Access Keys**
+- **Security**: Access keys are like root passwords - store securely (Azure Key Vault), rotate regularly
+
+#### Shared Access Signature (SAS)
+- URI token granting restricted access to storage resources
+- **Benefits**: Granular control (specific resources, permissions, time period) vs full access with keys
+- **SAS Types**:
+  - **User Delegation SAS**: Secured with Entra ID (most secure)
+  - **Service SAS**: Access to specific service (Blob, Queue, Table, File)
+  - **Account SAS**: Access to multiple services
+- **Creating SAS**:
+  - **Container level**: Container → **Shared access tokens**
+  - **Blob level**: Open blob → **Generate SAS** (from top menu or right-click context menu)
+  - **Storage account level**: Storage account → **Shared access signature**
+- **SAS Configuration Parameters**:
+  - **Signing key**: Choose which access key to use (key1 or key2)
+  - **Permissions**: Read, Write, Delete, List, Add, Create, Update, Process (select only needed)
+  - **Start date/time**: When SAS becomes valid
+  - **Expiry date/time**: When SAS expires
+  - **Allowed IP addresses**: Restrict to specific IP ranges
+  - **Allowed protocols**: HTTPS only (recommended) or HTTP and HTTPS
+  - **Stored access policy**: Reference to predefined access policy (optional)
+- **Stored Access Policy**:
+  - Created at container level: Container → **Settings** → **Access policy** → **Add policy**
+  - Define permissions, start/expiry times centrally in the policy
+  - When generating SAS, select the stored access policy instead of defining parameters directly
+  - **Benefits**: Centralized management - modify or revoke permissions for all SAS tokens using that policy without regenerating access keys
+  - **Revoking**: Delete or modify the stored access policy to immediately affect all associated SAS tokens
+- **Revoking SAS without Stored Access Policy**: Cannot revoke individual SAS tokens - only way is regenerating the access key used to create it (revokes all SAS tokens created with that key)
+- **Best practices**: Use stored access policies for easier management, shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
+
+#### Controlling Storage Access Methods
+- **"Default to Microsoft Entra Auth in Azure Portal"**: Storage account → **Settings** → **Configurations**
+  - When enabled: Azure Portal defaults to using Entra ID (RBAC) authentication
+  - When disabled: Azure Portal defaults to using access keys
+  - Note: This only controls the default method in the portal; both methods remain available
+- **"Allow Storage account key access"**: Storage account → **Settings** → **Configurations**
+  - When disabled: Completely blocks access key authentication (enforces Entra ID only)
+  - Best practice: Disable if you want to enforce RBAC-only access
+
+#### Storage RBAC - Resource Permissions vs Data Permissions
+- **Resource permissions**: Control management operations on the storage account (create, delete, modify settings, assign roles)
+  - Examples: Owner, Contributor, Reader roles
+  - Owner can manage everything but cannot read/write data by default
+  - Contributor can manage resources but cannot assign roles
+  - Reader can only view resource properties
+- **Data permissions**: Control access to data within storage (blobs, queues, tables, files)
+  - Examples: Storage Blob Data Owner, Storage Blob Data Contributor, Storage Blob Data Reader
+  - Separate from resource permissions
+  - Required to read/write data even if you have Owner role on the resource
+- **View your access**: Storage account → **IAM** → **View my access** button to see current permissions
+
+#### Storage Roles
+- **Resource management roles**:
+  - **Owner**: Full management access (manage everything, assign roles)
+  - **Contributor**: Manage resources but cannot assign roles
+  - **Reader**: Read-only access to resource properties
+- **Data access roles** (Storage-specific):
+  - **Storage Blob Data Owner**: Full access to blob containers and data (read, write, delete, manage)
+  - **Storage Blob Data Contributor**: Read, write, and delete blob data
+  - **Storage Blob Data Reader**: Read-only access to blob data
+  - Similar roles exist for Queues, Tables, and Files (e.g., Storage Queue Data Contributor)
+- **Role descriptions**: Check role descriptions in **IAM** → **Roles** tab to understand access levels
+
+#### Assigning Storage Roles
+- **Method 1**: Storage account → **IAM** → **Roles** tab → Select role checkbox → Click **Add role assignment** → Assign to user/group
+- **Method 2**: Storage account → **IAM** → **Add role assignment** button → Select role → Assign to user/group/service principal
+- **Scope inheritance**: Roles assigned at storage account level apply to all containers, queues, and tables within that account
+- **Resource group level**: Assign roles at resource group level for environment-specific access (e.g., separate prod/dev resource groups)
+- **Permission combination**: Role assignments are cumulative across scopes (union of all permissions)
+
+#### Container-Level Role Assignment
+- **Container-specific permissions**: Open container → **IAM** (left menu) → Assign roles from this screen
+- **Scope**: Role assignments at container level affect only that specific container, not all containers in the storage account
+- **Inheritance**: Storage-level role assignments are inherited by all containers, but container-level assignments override for that specific container
+- **Access method switch**: When viewing container data (**Data Storage** → container), toggle switch at top of page to switch between:
+  - **Access key**: Uses storage account keys (token-based)
+  - **IAM role**: Uses assigned RBAC roles
+
+### 🗄️ Azure Data Services
 - **SQL Services**:
   - **Azure SQL Database**: Managed relational database (PaaS), serverless and provisioned tiers
   - **Azure SQL Managed Instance**: Near 100% compatibility with SQL Server, VNet integration
@@ -390,86 +484,12 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Easier user onboarding**: New users can be quickly added to the system by assigning appropriate roles
   - **Scalability**: Easy to manage permissions for large numbers of users
 
-#### Storage Authentication Methods
-- **Token-Based Access (CBAC - Claim Based Access Control)**:
-  - Default authentication method when "Default to Microsoft Entra Auth in Azure Portal" is disabled
-  - Access uses storage account keys (tokens)
-  - View keys: Storage account → **Security + Networking** → **Access Keys**
-  - Keys must be shared with applications or users who need access
-  - Less granular control compared to RBAC
-- **Role-Based Access (RBAC)**:
-  - Enabled by setting "Default to Microsoft Entra Auth in Azure Portal" to enabled
-  - Provides granular access control through Azure roles
-  - Recommended for better security and access management
-
-#### Storage Access Keys
-- **Two access keys** (key1 and key2) provide full access to storage account and all data
-- **Why two keys**: Enables key rotation without downtime
-  - Applications use key1 → Regenerate key2 → Switch apps to key2 → Regenerate key1
-- **Location**: Storage account → **Security + Networking** → **Access Keys**
-- **Security**: Access keys are like root passwords - store securely (Azure Key Vault), rotate regularly
-
-#### Shared Access Signature (SAS)
-- URI token granting restricted access to storage resources
-- **Benefits**: Granular control (specific resources, permissions, time period) vs full access with keys
-- **SAS Types**:
-  - **User Delegation SAS**: Secured with Entra ID (most secure)
-  - **Service SAS**: Access to specific service (Blob, Queue, Table, File)
-  - **Account SAS**: Access to multiple services
-- **Creating SAS**:
-  - **Container level**: Container → **Shared access tokens**
-  - **Blob level**: Open blob → **Generate SAS** (from top menu or right-click context menu)
-  - **Storage account level**: Storage account → **Shared access signature**
-- **SAS Configuration Parameters**:
-  - **Signing key**: Choose which access key to use (key1 or key2)
-  - **Permissions**: Read, Write, Delete, List, Add, Create, Update, Process (select only needed)
-  - **Start date/time**: When SAS becomes valid
-  - **Expiry date/time**: When SAS expires
-  - **Allowed IP addresses**: Restrict to specific IP ranges
-  - **Allowed protocols**: HTTPS only (recommended) or HTTP and HTTPS
-  - **Stored access policy**: Reference to predefined access policy (optional)
-- **Stored Access Policy**:
-  - Created at container level: Container → **Settings** → **Access policy** → **Add policy**
-  - Define permissions, start/expiry times centrally in the policy
-  - When generating SAS, select the stored access policy instead of defining parameters directly
-  - **Benefits**: Centralized management - modify or revoke permissions for all SAS tokens using that policy without regenerating access keys
-  - **Revoking**: Delete or modify the stored access policy to immediately affect all associated SAS tokens
-- **Revoking SAS without Stored Access Policy**: Cannot revoke individual SAS tokens - only way is regenerating the access key used to create it (revokes all SAS tokens created with that key)
-- **Best practices**: Use stored access policies for easier management, shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
-
-#### Enabling RBAC for Storage Accounts
-- **During creation**: Enable "Default to Microsoft Entra Auth in Azure Portal" option
-- **After creation**: Storage account → **Settings** → **Configurations** → Enable "Default to Microsoft Entra Auth in Azure Portal"
-- **Best practice**: After enabling RBAC, disable "Allow Storage account key access" to immediately block token-based access (unless applications still require key access)
-
-#### Resource Permissions vs Data Permissions
-- **Resource permissions**: Control management operations on the storage account (create, delete, modify settings, assign roles)
-  - Examples: Owner, Contributor, Reader roles
-  - Owner can manage everything but cannot read/write data by default
-  - Contributor can manage resources but cannot assign roles
-  - Reader can only view resource properties
-- **Data permissions**: Control access to data within storage (blobs, queues, tables, files)
-  - Examples: Storage Blob Data Owner, Storage Blob Data Contributor, Storage Blob Data Reader
-  - Separate from resource permissions
-  - Required to read/write data even if you have Owner role on the resource
-- **View your access**: Storage account → **IAM** → **View my access** button to see current permissions
-
-#### Storage Roles
-- **Resource management roles**:
-  - **Owner**: Full management access (manage everything, assign roles)
-  - **Contributor**: Manage resources but cannot assign roles
-  - **Reader**: Read-only access to resource properties
-- **Data access roles** (Storage-specific):
-  - **Storage Blob Data Owner**: Full access to blob containers and data (read, write, delete, manage)
-  - **Storage Blob Data Contributor**: Read, write, and delete blob data
-  - **Storage Blob Data Reader**: Read-only access to blob data
-  - Similar roles exist for Queues, Tables, and Files (e.g., Storage Queue Data Contributor)
-- **Role descriptions**: Check role descriptions in **IAM** → **Roles** tab to understand access levels
-
-#### Assigning Roles (Storage-Specific)
-- **Method 1**: Storage account → **IAM** → **Roles** tab → Select role checkbox → Click **Add role assignment** → Assign to user/group
-- **Method 2**: Storage account → **IAM** → **Add role assignment** button → Select role → Assign to user/group/service principal
-- **Scope inheritance**: Roles assigned at storage account level apply to all containers, queues, and tables within that account
+#### Assigning Roles
+- **Resource level**: Resource → **IAM** → **Add role assignment** → Select role → Assign to user/group/service principal
+- **Resource group level**: Resource Groups → Select resource group → **IAM** → Assign roles
+  - Useful for environment-specific access (e.g., separate prod/dev resource groups)
+- **Subscription level**: Subscription → **IAM** → Assign roles
+- **Scope inheritance**: Roles assigned at higher levels (subscription) are inherited by lower levels (resource groups, resources)
 
 #### Custom Roles
 - **Creation location**: Subscription level → **IAM** → **Roles** → **+ Add** → **Add custom role**
@@ -482,28 +502,15 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Limits the scope where this role can be used
 - **Limit**: Maximum of 5000 custom roles per tenant (avoid creating excessive custom roles)
 
-#### Resource Group Level Role Assignment
-- Assign roles at resource group level for environment-specific access (e.g., separate prod/dev resource groups)
-- Navigate to **Resource Groups** → Select resource group → **IAM** → Assign roles
-- Useful for granting access to specific environments without affecting other resource groups
-
 #### Permission Combination
 - **Cumulative permissions**: Role assignments are combined across different scopes
-- **Example**: User with "Storage Blob Data Reader" at storage level + "Storage Blob Data Contributor" at resource group level = User has delete permission (union of all permissions)
+- **Example**: User with "Reader" at subscription level + "Contributor" at resource group level = User has contributor access to that resource group (union of all permissions)
 
 #### Viewing Access Assignments
-- **Method 1**: Resource group → **IAM** → View role assignments for that resource group
+- **Method 1**: Resource/Resource group/Subscription → **IAM** → View role assignments
 - **Method 2**: Entra ID → **Users** → Open user → Check both:
   - **Assigned Roles**: Entra ID roles (e.g., Global Administrator, User Administrator)
   - **Azure role assignments**: Azure RBAC role assignments across subscriptions, resource groups, and resources
-
-#### Container-Level Role Assignment
-- **Container-specific permissions**: Open container → **IAM** (left menu) → Assign roles from this screen
-- **Scope**: Role assignments at container level affect only that specific container, not all containers in the storage account
-- **Inheritance**: Storage-level role assignments are inherited by all containers, but container-level assignments override for that specific container
-- **Access method switch**: When viewing container data (**Data Storage** → container), toggle switch at top of page to switch between:
-  - **Access key**: Uses storage account keys (token-based)
-  - **IAM role**: Uses assigned RBAC roles
 
 ## 🛡️ Governance & Compliance
 
