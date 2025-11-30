@@ -162,6 +162,35 @@ Four major categories:
   - **Cold**: Rarely accessed (90+ days)
   - **Archive**: Long-term archival storage, lowest cost, but data must be rehydrated before access (not available as default during storage account creation)
 
+#### Lifecycle Management
+- **What it is**: Automated policy-based data management to transition blobs between tiers or delete them
+- **Location**: Storage account → **Data management** → **Lifecycle management**
+- **Benefits**: Great for saving huge money on storage costs by automatically managing data lifecycle
+- **Rule configuration** (first tab):
+  - **Rule Scope**:
+    - **Apply rule to all blobs**: Applies to entire storage account
+    - **Limit blobs with filters**: Opens **Filter set** tab for additional filtering
+  - **Blob type**: Block blobs or Append blobs
+  - **Blob subtype**: Base blobs, Snapshots, or Versions
+- **Filter set** tab (when "Limit blobs with filters" is selected):
+  - **Blob prefix**: Apply to specific blob name patterns (e.g., "logs/")
+  - **Blob index match**: Filter by blob index tags
+- **Rule actions** (can define multiple actions in sequence):
+  - **Move to cool tier**: After X days since creation/last modification/last access
+  - **Move to cold tier**: After X days since creation/last modification/last access
+  - **Move to archive tier**: After X days since creation/last modification/last access
+  - **Delete blobs**: After X days since creation/last modification/last access
+- **Minimum retention requirements** (charged for minimum period even if moved/deleted earlier):
+  - **Cool tier**: Minimum 30 days
+  - **Cold tier**: Minimum 90 days
+  - **Archive tier**: Minimum 180 days
+
+#### Object Replication
+- Asynchronously copies block blobs between source and destination storage accounts
+- **Use cases**: Disaster recovery, minimize latency, compliance
+- **Requirements**: Blob versioning must be enabled on both accounts
+- **Location**: Storage account → **Data management** → **Object replication**
+
 #### Storage Authentication Methods
 - **Token-Based Access (Access Keys)**:
   - Access uses storage account keys (tokens)
