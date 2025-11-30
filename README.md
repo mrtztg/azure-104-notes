@@ -191,6 +191,34 @@ Four major categories:
 - **Requirements**: Blob versioning must be enabled on both accounts
 - **Location**: Storage account → **Data management** → **Object replication**
 
+#### AzCopy
+- Command-line utility for copying data to/from Azure Storage
+- **Use cases**:
+  - Copy from local machine to storage account
+  - Copy between storage accounts
+  - Copy between containers
+  - Sync directories
+- **Authentication methods**:
+  - **Entra ID (Microsoft Entra)**: `azcopy login` (recommended for interactive use)
+  - **SAS token**: Append SAS token to destination URL
+  - **Access key**: Via connection string or storage account key
+- **Common commands**:
+  - `azcopy copy <source> <destination>`: Copy files
+  - `azcopy sync <source> <destination>`: Sync directories (one-way)
+  - `azcopy remove <target>`: Delete blobs
+- **Benefits**: Fast, resumable transfers with parallelism and automatic retries
+
+#### Storage Browser
+- Azure Portal GUI tool for managing storage files across multiple accounts
+- **Features**: Upload, download, copy, paste, delete operations with graphical interface
+- **Location**: Search "Storage browser" in Azure Portal
+
+#### Azure File Share
+- Fully managed cloud file shares accessible via SMB and NFS protocols
+- **Use cases**: Shared application files, configuration files, lift-and-shift scenarios
+- **Access**: Mount as network drive on Windows/Linux/macOS (SMB requires port 445 open)
+- **Location**: Storage account → **Data storage** → **File shares** (also accessible via Storage browser)
+
 #### Storage Authentication Methods
 - **Token-Based Access (Access Keys)**:
   - Access uses storage account keys (tokens)
