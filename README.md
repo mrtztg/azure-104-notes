@@ -64,7 +64,8 @@ Four major categories:
 
 ## 🖥️ Azure Virtual Machines (VMs)
 
-### VM Creation - Basics Tab
+### VM Creation
+**Basics Tab:**
 - **Availability options**:
   - **No infrastructure redundancy required**: Single VM, no high availability
   - **Availability zone**: Deploy VM in specific zone within region (protects against datacenter failures)
@@ -84,21 +85,21 @@ Four major categories:
   - **Use cases**: Batch processing, dev/test environments, interruptible workloads
   - **Not suitable for**: Production workloads requiring high availability
 
-### VM Creation - Disks Tab
+**Disks Tab:**
 - **OS disk type**: Premium SSD, Standard SSD, Standard HDD
-- **Encryption at host**: Encrypts data at rest on VM host
+- **Encryption at host**: Encrypts data at rest on VM host (Additional encryption by OS. Is not required, unless you want maximum encryption)
 - **Delete with VM**: Auto-delete disk when VM deleted
 - **Key management**: Platform-managed key (PMK) or Customer-managed key (CMK)
 - **Enable Ultra Disk compatibility**: Allows attaching Ultra Disks for highest performance
 - **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
 
-### VM Creation - Networking Tab
+**Networking Tab:**
 - **Virtual network**: Select existing VNet or create new (required - every VM must be in a VNet)
   - **Address space**: IP range for entire VNet (e.g., 10.0.0.0/16 provides 65,536 IPs)
   - **Subnet**: Subdivision of VNet for organizing resources (e.g., 10.0.1.0/24 provides 256 IPs)
 - **NIC network security group**: Network interface-level firewall
   - **None**: No NSG attached
-  - **Basic**: Auto-created NSG with simple inbound port rules
+  - **Basic**: Auto-created NSG with simple inbound port rules (This option is enough for most cases)
   - **Advanced**: Attach existing NSG with custom rules
 - **Public inbound ports**: Allow selected ports (SSH 22, RDP 3389, HTTP 80, HTTPS 443) or None
 - **Delete public IP and NIC when VM is deleted**: Auto-delete networking resources with VM
@@ -108,6 +109,32 @@ Four major categories:
 - **Load balancing options**:
   - **Azure load balancer**: Layer 4 (TCP/UDP) load balancer, like AWS NLB
   - **Application Gateway**: Layer 7 (HTTP/HTTPS) load balancer, like AWS ALB
+
+**Management Tab:**
+- **Enable system assigned managed identity**: Enable if VM needs to access other Azure services (Storage, Key Vault, databases) without storing credentials
+- **Login with Microsoft Entra ID**: Allow users to login using Entra ID credentials
+- **Enable auto-shutdown**: Schedule automatic VM shutdown for cost savings
+- **Enable backup**: Configure Azure Backup for VM protection
+- **Enable periodic assessment**: Regular security and health assessments
+- **Enable hotpatch**: Apply security patches without rebooting (Windows Server only)
+- **Patch orchestration options**: Control how OS patches are applied (manual, automatic, Azure-orchestrated)
+- **Reboot setting**: Control VM behavior after patching (if required, never, always)
+
+**Monitoring Tab:**
+- **Enable recommended alert rules**: Auto-configure common alerts (CPU, memory, disk) - costs per alert
+- **Boot diagnostics**: Capture boot logs and screenshots (disable is okay for most cases)
+- **Enable guest diagnostics**: Collect detailed performance metrics from inside VM
+- **Enable application health monitoring**: Monitor application-level health status
+
+**Advanced Tab:**
+- **Extensions**: Install VM extensions for additional functionality (antivirus, monitoring agents, etc.)
+- **VM Applications**: Pre-package needed applications to deploy automatically during VM creation
+- **Custom data**: Pass startup scripts or configuration data to VM
+- **User data**: Similar to custom data, but retrievable from within VM after creation
+- **Performance (NVMe)**: Enable NVMe storage for highest disk performance
+- **Host group**: Place VM on dedicated physical host
+- **Capacity reservations**: Reserve compute capacity in advance (beneficial when guaranteed capacity is needed for critical workloads or during high-demand periods)
+- **Proximity placement group**: Group VMs for low latency by placing them physically close
 
 ## 📦 Azure Storage
 - Scalable from GBs to PBs (petabytes) for massive growth needs
