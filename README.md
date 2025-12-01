@@ -92,6 +92,23 @@ Four major categories:
 - **Enable Ultra Disk compatibility**: Allows attaching Ultra Disks for highest performance
 - **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
 
+### VM Creation - Networking Tab
+- **Virtual network**: Select existing VNet or create new (required - every VM must be in a VNet)
+  - **Address space**: IP range for entire VNet (e.g., 10.0.0.0/16 provides 65,536 IPs)
+  - **Subnet**: Subdivision of VNet for organizing resources (e.g., 10.0.1.0/24 provides 256 IPs)
+- **NIC network security group**: Network interface-level firewall
+  - **None**: No NSG attached
+  - **Basic**: Auto-created NSG with simple inbound port rules
+  - **Advanced**: Attach existing NSG with custom rules
+- **Public inbound ports**: Allow selected ports (SSH 22, RDP 3389, HTTP 80, HTTPS 443) or None
+- **Delete public IP and NIC when VM is deleted**: Auto-delete networking resources with VM
+- **Enable accelerated networking**: SR-IOV bypasses host for direct VM-to-network communication
+  - **Use cases**: High-performance workloads, low-latency applications, high packet-per-second scenarios
+  - Requires supported VM size
+- **Load balancing options**:
+  - **Azure load balancer**: Layer 4 (TCP/UDP) load balancer, like AWS NLB
+  - **Application Gateway**: Layer 7 (HTTP/HTTPS) load balancer, like AWS ALB
+
 ## 📦 Azure Storage
 - Scalable from GBs to PBs (petabytes) for massive growth needs
 - Storage types:
