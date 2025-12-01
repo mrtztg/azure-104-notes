@@ -3,11 +3,7 @@
 
 > **Note**: Not everything in this section will appear on the AZ-104 exam. This is an overview of Azure services.
 
-### 🖥️ Azure Virtual Machines (VMs)
-- On-demand scalable compute resources
-- Common uses: Windows Server, Linux VMs, jumpboxes, app servers
-
-#### VM Abstractions (Services Built on VMs)
+### VM Abstractions (Services Built on VMs)
 - **Azure Batch**: Large-scale parallel and high-performance computing (HPC) workloads
 - **Virtual Machine Scale Sets (VMSS)**: Auto-scale and load-balance sets of identical VMs
 - **Azure Kubernetes Service (AKS)**: Managed Kubernetes clusters orchestrating containerized applications (runs on VM node pools)
@@ -66,7 +62,37 @@ Four major categories:
 - **Metrics and Logs**: Network performance and diagnostic logging
 - **Packet Capture**: Capture network traffic for analysis
 
-### 📦 Azure Storage
+## 🖥️ Azure Virtual Machines (VMs)
+
+### VM Creation - Basics Tab
+- **Availability options**:
+  - **No infrastructure redundancy required**: Single VM, no high availability
+  - **Availability zone**: Deploy VM in specific zone within region (protects against datacenter failures)
+  - **Virtual machine scale set**: Auto-scaling group of identical VMs with load balancing
+  - **Availability set**: Group VMs across fault domains and update domains within single datacenter (99.95% SLA)
+- **Security type**:
+  - **Standard**: Regular VM without additional security features
+  - **Trusted launch**: Secure boot, vTPM (virtual Trusted Platform Module), integrity monitoring (protects against boot kits and rootkits)
+  - **Confidential**: Encrypted in-memory processing for sensitive workloads (requires specific VM sizes)
+- **Run with Azure Spot discount**:
+  - Uses Azure's excess capacity at significant discount (up to 90% off)
+  - VMs can be evicted when Azure needs capacity back
+  - **Eviction type**:
+    - **Capacity only**: Evict only when Azure needs capacity
+    - **Price or capacity**: Evict when capacity needed or when price exceeds your max price
+  - **Eviction policy**: Deallocate (stop) or Delete
+  - **Use cases**: Batch processing, dev/test environments, interruptible workloads
+  - **Not suitable for**: Production workloads requiring high availability
+
+### VM Creation - Disks Tab
+- **OS disk type**: Premium SSD, Standard SSD, Standard HDD
+- **Encryption at host**: Encrypts data at rest on VM host
+- **Delete with VM**: Auto-delete disk when VM deleted
+- **Key management**: Platform-managed key (PMK) or Customer-managed key (CMK)
+- **Enable Ultra Disk compatibility**: Allows attaching Ultra Disks for highest performance
+- **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
+
+## 📦 Azure Storage
 - Scalable from GBs to PBs (petabytes) for massive growth needs
 - Storage types:
   - **Blob Storage**: Stores unstructured data (objects, files, images, backups)
