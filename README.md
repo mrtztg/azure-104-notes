@@ -218,6 +218,8 @@ Four major categories:
 - **Use cases**: Shared application files, configuration files, lift-and-shift scenarios
 - **Access**: Mount as network drive on Windows/Linux/macOS (SMB requires port 445 open)
 - **Location**: Storage account → **Data storage** → **File shares** (also accessible via Storage browser)
+- **Snapshots**: Manual one-time copy of files, browse/restore individual files (File share → **Operations** → **Snapshots**, or Windows "Previous Versions" tab)
+- **Backup**: Scheduled/frequent backup with configurable policies and retention (File share → **Operations** → **Backup**)
 
 #### Storage Authentication Methods
 - **Token-Based Access (Access Keys)**:
