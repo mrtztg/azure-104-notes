@@ -1,9 +1,11 @@
 # ☁️ azure-104-notes
+
 ## 🏗️ Azure Concepts
 
 > **Note**: Not everything in this section will appear on the AZ-104 exam. This is an overview of Azure services.
 
 ### VM Abstractions (Services Built on VMs)
+
 - **Azure Batch**: Large-scale parallel and high-performance computing (HPC) workloads
 - **Virtual Machine Scale Sets (VMSS)**: Auto-scale and load-balance sets of identical VMs
 - **Azure Kubernetes Service (AKS)**: Managed Kubernetes clusters orchestrating containerized applications (runs on VM node pools)
@@ -22,18 +24,21 @@
 ### 🌐 Azure Networking
 
 #### Microservices
+
 - **Azure Container Apps**: Serverless container platform, auto-scales
 - **API Management (APIM)**: API gateway and lifecycle management
 - **Azure Container Instances (ACI)**: Serverless containers, no infrastructure management
 - **Service Fabric**: Distributed microservices platform
 
 #### Serverless/Event-Driven
+
 - **Azure Functions**: Serverless event-driven code execution
 - **Azure Logic Apps**: Serverless workflow automation
 
 Four major categories:
 
 #### Connectivity
+
 - **Virtual Network (VNet)**: Isolated network environment in Azure
 - **Virtual WAN**: Unified hub-and-spoke network connectivity
 - **ExpressRoute**: Private, dedicated connection between on-premises and Azure
@@ -42,6 +47,7 @@ Four major categories:
 - **Peering**: Connect VNets together
 
 #### Security
+
 - **Network Security Groups (NSGs)**: Firewall rules for subnet and NIC level traffic control
 - **Private Link**: Private connectivity to Azure services via Private Endpoints
 - **DDoS Protection**: Protection against distributed denial-of-service attacks
@@ -51,6 +57,7 @@ Four major categories:
 - **Azure Bastion**: Secure RDP/SSH access to VMs without public IPs
 
 #### Delivery
+
 - **Azure CDN**: Content delivery network for global content distribution
 - **Azure Front Door**: Global entry point with WAF, SSL termination, and routing
 - **Traffic Manager**: DNS-based traffic distribution across regions
@@ -58,6 +65,7 @@ Four major categories:
 - **Azure Load Balancer**: Layer 4 load balancer for TCP/UDP traffic distribution
 
 #### Monitoring
+
 - **Network Watcher**: Network monitoring and diagnostics tool
 - **Metrics and Logs**: Network performance and diagnostic logging
 - **Packet Capture**: Capture network traffic for analysis
@@ -65,7 +73,9 @@ Four major categories:
 ## 🖥️ Azure Virtual Machines (VMs)
 
 ### VM Creation
+
 **Basics Tab:**
+
 - **Availability options**:
   - **No infrastructure redundancy required**: Single VM, no high availability
   - **Availability zone**: Deploy VM in specific zone within region (protects against datacenter failures)
@@ -86,6 +96,7 @@ Four major categories:
   - **Not suitable for**: Production workloads requiring high availability
 
 **Disks Tab:**
+
 - **OS disk type**: Premium SSD, Standard SSD, Standard HDD
 - **Encryption at host**: Encrypts data at rest on VM host (Additional encryption by OS. Is not required, unless you want maximum encryption)
 - **Delete with VM**: Auto-delete disk when VM deleted
@@ -94,6 +105,7 @@ Four major categories:
 - **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
 
 **Networking Tab:**
+
 - **Virtual network**: Select existing VNet or create new (required - every VM must be in a VNet)
   - **Address space**: IP range for entire VNet (e.g., 10.0.0.0/16 provides 65,536 IPs)
   - **Subnet**: Subdivision of VNet for organizing resources (e.g., 10.0.1.0/24 provides 256 IPs)
@@ -111,6 +123,7 @@ Four major categories:
   - **Application Gateway**: Layer 7 (HTTP/HTTPS) load balancer, like AWS ALB
 
 **Management Tab:**
+
 - **Enable system assigned managed identity**: Enable if VM needs to access other Azure services (Storage, Key Vault, databases) without storing credentials
 - **Login with Microsoft Entra ID**: Allow users to login using Entra ID credentials
 - **Enable auto-shutdown**: Schedule automatic VM shutdown for cost savings
@@ -121,12 +134,14 @@ Four major categories:
 - **Reboot setting**: Control VM behavior after patching (if required, never, always)
 
 **Monitoring Tab:**
+
 - **Enable recommended alert rules**: Auto-configure common alerts (CPU, memory, disk) - costs per alert
 - **Boot diagnostics**: Capture boot logs and screenshots (disable is okay for most cases)
 - **Enable guest diagnostics**: Collect detailed performance metrics from inside VM
 - **Enable application health monitoring**: Monitor application-level health status
 
 **Advanced Tab:**
+
 - **Extensions**: Install VM extensions for additional functionality (antivirus, monitoring agents, etc.)
 - **VM Applications**: Pre-package needed applications to deploy automatically during VM creation
 - **Custom data**: Pass startup scripts or configuration data to VM
@@ -136,7 +151,19 @@ Four major categories:
 - **Capacity reservations**: Reserve compute capacity in advance (beneficial when guaranteed capacity is needed for critical workloads or during high-demand periods)
 - **Proximity placement group**: Group VMs for low latency by placing them physically close
 
+### 🔗 Connecting to VMs
+
+- **Connection options**: VM → **Connect** → Choose method (RDP, SSH, Bastion, Serial console)
+- **RDP (Windows)**: Port 3389, download `.rdp` file → Open with Remote Desktop client
+- **SSH (Linux)**: Port 22, use `ssh -i <key-path> <user>@<public-ip>` or password auth
+- **Azure Bastion**: Secure browser-based RDP/SSH without public IP on VM
+  - Requires `AzureBastionSubnet` in VNet
+  - No NSG rules needed, protects against port scanning
+- **Serial Console**: Text-based access for troubleshooting unresponsive VMs (requires boot diagnostics)
+- **Reset access**: VM → **Help** → **Reset password** (if locked out)
+
 ## 📦 Azure Storage
+
 - Scalable from GBs to PBs (petabytes) for massive growth needs
 - Storage types:
   - **Blob Storage**: Stores unstructured data (objects, files, images, backups)
@@ -155,6 +182,7 @@ Four major categories:
 - **Pricing comparison**: https://azure.microsoft.com/en-us/pricing/details/storage/blobs/
 
 #### Storage Account Creation Considerations
+
 - **Storage account name**: Must be globally unique across all of Azure (3-24 characters, lowercase letters and numbers only)
 - **Region selection**: Consider three factors:
   - Distance from users (lower latency)
@@ -172,6 +200,7 @@ Four major categories:
   - **GZRS (Geo-Zone-Redundant Storage)**: Safest option, combines ZRS and GRS
 
 **Advanced Tab Settings:**
+
 - **Security**:
   - **"Require secure transfer for REST API operations"**: Disables HTTP access, allows only HTTPS
   - **"Allow enabling anonymous access on individual containers"**: Check only when files need to be publicly accessible (e.g., website assets like videos, JS, CSS files)
@@ -183,6 +212,7 @@ Four major categories:
   - **Cold**: Rarely accessed (90+ days retention), even lower storage cost, even higher access cost
 
 **Networking Tab Settings:**
+
 - **Network access**:
   - **Enable**: Public access enabled (access key still required)
     - **Enable for all networks**: Accessible from internet
@@ -194,6 +224,7 @@ Four major categories:
   - **Internet routing**: Traffic through public internet (lower cost, may have higher latency)
 
 **Data Protection Tab Settings:**
+
 - **Recovery** (prevent accidental or malicious data loss):
   - **Enable point-in-time restore for containers**: Restore blob data to earlier state within retention period (requires versioning, change feed, and blob soft delete enabled)
   - **Enable soft delete for blobs**: Retain deleted blobs for specified days (can recover within retention period)
@@ -206,6 +237,7 @@ Four major categories:
   - **Enable version-level immutability support**: Prevents files from deletion or modification (WORM - Write Once Read Many). Use case: Store access logs that cannot be deleted, even if hacker gains access and attempts to erase their activity traces
 
 **Encryption Tab Settings:**
+
 - **Encryption types**:
   - **MMK (Microsoft-Managed Keys)**: Default option, Microsoft manages and rotates encryption keys automatically
   - **CMK (Customer-Managed Keys)**: Customer controls encryption keys for greater security and compliance
@@ -220,11 +252,13 @@ Four major categories:
   - **Enable infrastructure encryption**: Adds second layer of encryption at infrastructure level (double encryption for highly sensitive data)
 
 **Review + Create:**
+
 - Review all configuration settings across all tabs
 - Azure validates the configuration (checks policies, naming, quotas)
 - Click **Create** to deploy the storage account
 
 #### Blob Containers and Management
+
 - **Containers**: Organize blobs within storage account (like folders/boxes to put blobs in)
 - **Blob access tiers**: Can be set during file upload or changed later from top menu:
   - **Hot**: Frequent access
@@ -233,6 +267,7 @@ Four major categories:
   - **Archive**: Long-term archival storage, lowest cost, but data must be rehydrated before access (not available as default during storage account creation)
 
 #### Lifecycle Management
+
 - **What it is**: Automated policy-based data management to transition blobs between tiers or delete them
 - **Location**: Storage account → **Data management** → **Lifecycle management**
 - **Benefits**: Great for saving huge money on storage costs by automatically managing data lifecycle
@@ -256,12 +291,14 @@ Four major categories:
   - **Archive tier**: Minimum 180 days
 
 #### Object Replication
+
 - Asynchronously copies block blobs between source and destination storage accounts
 - **Use cases**: Disaster recovery, minimize latency, compliance
 - **Requirements**: Blob versioning must be enabled on both accounts
 - **Location**: Storage account → **Data management** → **Object replication**
 
 #### AzCopy
+
 - Command-line utility for copying data to/from Azure Storage
 - **Use cases**:
   - Copy from local machine to storage account
@@ -279,11 +316,13 @@ Four major categories:
 - **Benefits**: Fast, resumable transfers with parallelism and automatic retries
 
 #### Storage Browser
+
 - Azure Portal GUI tool for managing storage files across multiple accounts
 - **Features**: Upload, download, copy, paste, delete operations with graphical interface
 - **Location**: Search "Storage browser" in Azure Portal
 
 #### Azure File Share
+
 - Fully managed cloud file shares accessible via SMB and NFS protocols
 - **Use cases**: Shared application files, configuration files, lift-and-shift scenarios
 - **Access**: Mount as network drive on Windows/Linux/macOS (SMB requires port 445 open)
@@ -292,6 +331,7 @@ Four major categories:
 - **Backup**: Scheduled/frequent backup with configurable policies and retention (File share → **Operations** → **Backup**)
 
 #### Storage Authentication Methods
+
 - **Token-Based Access (Access Keys)**:
   - Access uses storage account keys (tokens)
   - View keys: Storage account → **Security + Networking** → **Access Keys**
@@ -304,6 +344,7 @@ Four major categories:
 - **Default to Microsoft Entra Auth in Azure Portal**: Controls which method the Azure Portal uses by default when you access storage (doesn't disable either method)
 
 #### Storage Access Keys
+
 - **Two access keys** (key1 and key2) provide full access to storage account and all data
 - **Why two keys**: Enables key rotation without downtime
   - Applications use key1 → Regenerate key2 → Switch apps to key2 → Regenerate key1
@@ -311,6 +352,7 @@ Four major categories:
 - **Security**: Access keys are like root passwords - store securely (Azure Key Vault), rotate regularly
 
 #### Shared Access Signature (SAS)
+
 - URI token granting restricted access to storage resources
 - **Benefits**: Granular control (specific resources, permissions, time period) vs full access with keys
 - **SAS Types**:
@@ -339,6 +381,7 @@ Four major categories:
 - **Best practices**: Use stored access policies for easier management, shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
 
 #### Controlling Storage Access Methods
+
 - **"Default to Microsoft Entra Auth in Azure Portal"**: Storage account → **Settings** → **Configurations**
   - When enabled: Azure Portal defaults to using Entra ID (RBAC) authentication
   - When disabled: Azure Portal defaults to using access keys
@@ -348,6 +391,7 @@ Four major categories:
   - Best practice: Disable if you want to enforce RBAC-only access
 
 #### Storage RBAC - Resource Permissions vs Data Permissions
+
 - **Resource permissions**: Control management operations on the storage account (create, delete, modify settings, assign roles)
   - Examples: Owner, Contributor, Reader roles
   - Owner can manage everything but cannot read/write data by default
@@ -360,6 +404,7 @@ Four major categories:
 - **View your access**: Storage account → **IAM** → **View my access** button to see current permissions
 
 #### Storage Roles
+
 - **Resource management roles**:
   - **Owner**: Full management access (manage everything, assign roles)
   - **Contributor**: Manage resources but cannot assign roles
@@ -372,6 +417,7 @@ Four major categories:
 - **Role descriptions**: Check role descriptions in **IAM** → **Roles** tab to understand access levels
 
 #### Assigning Storage Roles
+
 - **Method 1**: Storage account → **IAM** → **Roles** tab → Select role checkbox → Click **Add role assignment** → Assign to user/group
 - **Method 2**: Storage account → **IAM** → **Add role assignment** button → Select role → Assign to user/group/service principal
 - **Scope inheritance**: Roles assigned at storage account level apply to all containers, queues, and tables within that account
@@ -379,6 +425,7 @@ Four major categories:
 - **Permission combination**: Role assignments are cumulative across scopes (union of all permissions)
 
 #### Container-Level Role Assignment
+
 - **Container-specific permissions**: Open container → **IAM** (left menu) → Assign roles from this screen
 - **Scope**: Role assignments at container level affect only that specific container, not all containers in the storage account
 - **Inheritance**: Storage-level role assignments are inherited by all containers, but container-level assignments override for that specific container
@@ -387,6 +434,7 @@ Four major categories:
   - **IAM role**: Uses assigned RBAC roles
 
 ### 🗄️ Azure Data Services
+
 - **SQL Services**:
   - **Azure SQL Database**: Managed relational database (PaaS), serverless and provisioned tiers
   - **Azure SQL Managed Instance**: Near 100% compatibility with SQL Server, VNet integration
@@ -398,12 +446,14 @@ Four major categories:
 - **Azure Synapse Analytics**: Analytics service combining data warehousing and big data analytics (formerly SQL Data Warehouse)
 
 ### 🧩 Resource
+
 - An entity managed by Azure
 - **Expected examples**: Virtual Machine (VM), web app, storage account
 - **Unexpected examples**: Public IP address, network interface card (NIC), network security group (NSG)
 - Accounts can be given read, update, and owner rights to resources
 
 ### 📂 Resource Group
+
 - A way of organising resources in a subscription
 - Acts as a folder structure for resources
 - All resources must belong to only one resource group
@@ -411,6 +461,7 @@ Four major categories:
 - A way to separate out projects, keeping unrelated things separate
 
 ### 🚚 Moving Resources
+
 - Resources can be moved between resource groups, subscriptions, or regions
 - Navigate to resource group → Select resources → **Move** button (top menu)
 - Move options: Move to another resource group, Move to another subscription, Move to another region
@@ -457,20 +508,24 @@ Budgets help monitor and control spending by sending alerts and taking automated
 ### PowerShell
 
 #### Installation
+
 - Install Az module: `Install-Module -Name Az -AllowClobber -Repository PSGallery -Force`
 - Update module: `Update-Module -Name Az -AllowClobber -Repository PSGallery -Force`
 
 #### Connection
+
 - Connect to Azure: `Connect-AzAccount`
 - Switch between subscriptions:
   - List subscriptions: `Get-AzSubscription`
   - Set context: `Set-AzContext -Subscription "subscription-id"`
 
 #### Automation and Common Operations
+
 - PowerShell enables automation of Azure tasks through scripting
 - Store resource information in variables for reuse
 
 **Working with Resource Groups:**
+
 ```powershell
 # Get resource group and store in variable
 $rg = Get-AzResourceGroup -Name '<resource-group-name>' -Location '<location>'
@@ -482,6 +537,7 @@ $rg.ResourceId
 ```
 
 **Assigning Policy to Resource Group:**
+
 ```powershell
 # Step 1: Find policy in Azure Portal → Policy → Definitions → Copy Definition ID
 # Step 2: Get policy definition by ID
@@ -497,6 +553,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 ## 🔐 Entra ID
 
 ### Account / User
+
 - **Person**: User account with username, password, and MFA (multi-factor authentication)
   - Create a user from **Users** menu → **New User**
   - **User creation options** (radio group):
@@ -517,6 +574,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
 
 ### Tenant
+
 - A representation of an organization
 - Usually represented by a public domain name (e.g., `example.com`)
 - Will be assigned a domain if not specified (e.g., `example.onmicrosoft.com`)
@@ -530,22 +588,26 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Click your **profile picture** in the right corner → **Switch directory** → click **Switch** on the desired directory (tenant)
 
 ### Management Groups
+
 - Containers for organizing subscriptions within a tenant for governance at scale
 - Hierarchy: Tenant → Management Groups → Subscriptions → Resource Groups → Resources
 - Each tenant has a **Root Management Group** at the top level
 - Can create **child management groups** under the root or under other management groups (up to 6 levels deep)
 
 #### Creating Child Management Groups
+
 - Navigate to **Management Groups** service → **Create** (or select parent group → **Add management group**)
 - Specify parent management group (defaults to root)
 - Assign subscriptions to management groups for organizational structure
 
 #### Inheritance and Benefits
+
 - **Policy inheritance**: Policies assigned to parent management group automatically apply to all child management groups and subscriptions
 - **RBAC inheritance**: Role assignments at management group level inherited by child groups and subscriptions
 - **Benefits**: Centralized governance across multiple subscriptions, apply policies/RBAC once at scale instead of per subscription
 
 ### Subscription
+
 - An agreement with Microsoft to use Azure services and how to pay
 - All Azure resource usage gets billed to the payment method of the subscription
 - Types: Free subscription, Pay-As-You-Go (PAYG), Enterprise agreements
@@ -562,12 +624,14 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 ### Entra ID Management
 
 #### Assigned Roles
+
 - Access the **Assigned Roles** menu in Entra ID to view and manage role assignments for users and groups
 - Shows all roles assigned to a user or group across the tenant
 - Common roles include: Global Administrator, User Administrator, Application Administrator, and custom roles
 - Used to verify permissions and troubleshoot access issues
 
 #### Licenses and Paid Features
+
 - Some Azure features are available only in paid plans (e.g. self-service password change)
 - If you have a paid license (like P2), you can enable those paid features for specific users
 - Better to enable only for users who need them, as paid features cost per person
@@ -579,10 +643,12 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - To define Using Location: Open user → **Edit Properties** → change **Using Location** in the form
 
 #### Password Reset (Self-Service Password Reset)
+
 - **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or lost
 - Configure who can use it (all users, selected users, or none) and required authentication methods
 
 #### Administrative Units
+
 - Used to segregate Active Directory for administrative purposes
 - Create boundaries within your tenant to delegate administrative permissions
 - Can contain both users and groups
@@ -596,6 +662,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Geographic-based**: Create an Administrative Unit for "North America Region", add users and groups from that region, then assign administrators scoped to that unit - they can only manage resources in that region
 
 #### Devices
+
 - **Devices** menu in Entra ID shows devices that users used to login to applications (office, home, phone) as long as they authenticated through Azure
 - Can define requirements for devices that can connect to Azure (e.g., antivirus should be installed, password strength, etc.)
 - Can see all devices users used to connect
@@ -606,6 +673,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Max devices per user
 
 ### RBAC (Role-Based Access Control)
+
 - **Benefits**:
   - **Level of abstraction**: Permissions are managed at the role level rather than individual user level
   - **Simpler management**: Fewer errors due to centralized permission management
@@ -614,6 +682,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Scalability**: Easy to manage permissions for large numbers of users
 
 #### Assigning Roles
+
 - **Resource level**: Resource → **IAM** → **Add role assignment** → Select role → Assign to user/group/service principal
 - **Resource group level**: Resource Groups → Select resource group → **IAM** → Assign roles
   - Useful for environment-specific access (e.g., separate prod/dev resource groups)
@@ -621,6 +690,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **Scope inheritance**: Roles assigned at higher levels (subscription) are inherited by lower levels (resource groups, resources)
 
 #### Custom Roles
+
 - **Creation location**: Subscription level → **IAM** → **Roles** → **+ Add** → **Add custom role**
 - **Creation options**:
   - **Clone a role**: Start from an existing role that closely matches your needs, then modify permissions
@@ -632,10 +702,12 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **Limit**: Maximum of 5000 custom roles per tenant (avoid creating excessive custom roles)
 
 #### Permission Combination
+
 - **Cumulative permissions**: Role assignments are combined across different scopes
 - **Example**: User with "Reader" at subscription level + "Contributor" at resource group level = User has contributor access to that resource group (union of all permissions)
 
 #### Viewing Access Assignments
+
 - **Method 1**: Resource/Resource group/Subscription → **IAM** → View role assignments
 - **Method 2**: Entra ID → **Users** → Open user → Check both:
   - **Assigned Roles**: Entra ID roles (e.g., Global Administrator, User Administrator)
@@ -644,6 +716,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 ## 🛡️ Governance & Compliance
 
 ### 🏷️ Tags
+
 - Key-value pair metadata applied to Azure resources for organization and management
 - Can be applied to resources, resource groups, and subscriptions
 - Common uses: cost tracking, environment identification (prod/dev), ownership, automation
@@ -652,48 +725,57 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Use Azure Policy to enforce tagging requirements or automatically apply tags
 
 ### 🔒 Resource Lock
+
 - Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
 - Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
 - These locks help protect critical resources from accidental deletion or modification
 
 ### 📋 Azure Policy
+
 - Service for defining and enforcing governance rules at subscription or resource group level
 - Azure provides hundreds of built-in policies ready to use
 - During resource creation, **Review + Create** step validates against assigned policies
 
 #### Finding and Assigning Built-in Policies
+
 - Navigate to **Policy** service → **Authoring → Definitions**
 - Search by keyword (e.g., "Allowed locations"), click to view JSON definition
 - Assign to desired scope (subscription, management group, or resource group)
 - Fill predefined parameters (e.g., allowed regions) and custom non-compliance message
 
 #### Definition Types
+
 - **Policy**: Single policy definition with specific rule
 - **Initiative**: Collection of multiple policies grouped together
 - Can create custom policy or initiative definitions
 
 #### Creating Custom Policy Definitions
+
 - Copy JSON from built-in policies to learn structure and syntax
 - **Finding resource property keys**: Create resource (e.g., storage) → **Review + Create** → **Download a template for automation** or **View automation template** to see JSON keys
 - **Role definitions**: If policy requires permissions (e.g., for "DeployIfNotExists" or "Modify" effects), specify required role definitions during policy creation to grant necessary permissions
 
 **Basic policy template:**
+
 ```json
 {
-  "mode": "All",  // "All" applies to all resource types, "Indexed" applies to resources that support tags and location
+  "mode": "All", // "All" applies to all resource types, "Indexed" applies to resources that support tags and location
   "policyRule": {
-    "if": {  // Condition to evaluate
-      "field": "<resource-property-key>",  // Property to check (e.g., "type", "location")
-      "equals": "<value>"  // Value to match
+    "if": {
+      // Condition to evaluate
+      "field": "<resource-property-key>", // Property to check (e.g., "type", "location")
+      "equals": "<value>" // Value to match
     },
-    "then": {  // Action to take if condition is true
-      "effect": "[parameters('effect')]"  // References parameter below
+    "then": {
+      // Action to take if condition is true
+      "effect": "[parameters('effect')]" // References parameter below
     }
   },
-  "parameters": {  // Define configurable parameters for flexibility
+  "parameters": {
+    // Define configurable parameters for flexibility
     "effect": {
       "type": "String",
-      "allowedValues": ["<option1>", "<option2>"],  // Options like "Deny", "Audit", "Disabled"
+      "allowedValues": ["<option1>", "<option2>"], // Options like "Deny", "Audit", "Disabled"
       "defaultValue": "<default-option>"
     }
   }
@@ -701,31 +783,33 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 ```
 
 **Example - Require HTTPS for Storage Accounts:**
+
 ```json
 {
   "mode": "All",
   "policyRule": {
     "if": {
-      "allOf": [  // All conditions must be true
+      "allOf": [
+        // All conditions must be true
         {
-          "field": "type",  // Check resource type
+          "field": "type", // Check resource type
           "equals": "Microsoft.Storage/storageAccounts"
         },
         {
-          "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly",  // Check HTTPS property
-          "notEquals": "true"  // If HTTPS is NOT enabled
+          "field": "Microsoft.Storage/storageAccounts/supportsHttpsTrafficOnly", // Check HTTPS property
+          "notEquals": "true" // If HTTPS is NOT enabled
         }
       ]
     },
     "then": {
-      "effect": "[parameters('effect')]"  // Apply deny or disabled effect
+      "effect": "[parameters('effect')]" // Apply deny or disabled effect
     }
   },
   "parameters": {
     "effect": {
       "type": "String",
-      "allowedValues": ["Deny", "Disabled"],  // Either block creation or just disable policy
-      "defaultValue": "Deny",  // Default: prevent non-HTTPS storage accounts
+      "allowedValues": ["Deny", "Disabled"], // Either block creation or just disable policy
+      "defaultValue": "Deny", // Default: prevent non-HTTPS storage accounts
       "metadata": {
         "displayName": "Effect",
         "description": "Enable or disable the execution of the policy"
@@ -736,4 +820,5 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 ```
 
 #### Viewing Assignments
+
 - **Authoring → Assignments**: View all assigned policies, their scopes, and compliance status
