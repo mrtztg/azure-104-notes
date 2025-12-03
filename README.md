@@ -162,6 +162,15 @@ Four major categories:
 - **Serial Console**: Text-based access for troubleshooting unresponsive VMs (requires boot diagnostics)
 - **Reset access**: VM → **Help** → **Reset password** (if locked out)
 
+### 💾 Adding Data Disks
+
+- **Location**: VM → **Settings** → **Disks** → **+ Create and attach a new disk** or **Attach existing disks**
+- **Disk types**: Premium SSD (fastest), Standard SSD, Standard HDD, Ultra Disk (highest IOPS)
+- **vs Temporary disk**: Data disks persist across reboots/deallocations; temporary disk (D: drive) is lost on deallocation
+- **After attaching**: Must initialize and format disk inside VM (Windows: Disk Management, Linux: `fdisk`/`mkfs`)
+- **Max disks**: Limited by VM size (check VM specs for maximum data disk count)
+- **Detach**: Can detach and reattach to different VMs (same region)
+
 ## 📦 Azure Storage
 
 - Scalable from GBs to PBs (petabytes) for massive growth needs
