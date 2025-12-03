@@ -74,6 +74,12 @@ Four major categories:
 
 ### VM Creation
 
+**CLI/PowerShell:**
+
+- **Azure CLI**: `az vm create -n <vm-name> -g <resource-group> --image <image-name>`
+- **PowerShell**: `New-AzVM -Name <vm-name> -Credential (Get-Credential)`
+- **PowerShell script**: Upload and run shell scripts for automated provisioning
+
 **Basics Tab:**
 
 - **Availability options**:
@@ -156,11 +162,19 @@ Four major categories:
 - **Connection options**: VM → **Connect** → Choose method (RDP, SSH, Bastion, Serial console)
 - **RDP (Windows)**: Port 3389, download `.rdp` file → Open with Remote Desktop client
 - **SSH (Linux)**: Port 22, use `ssh -i <key-path> <user>@<public-ip>` or password auth
-- **Azure Bastion**: Secure browser-based RDP/SSH without public IP on VM
-  - Requires `AzureBastionSubnet` in VNet
-  - No NSG rules needed, protects against port scanning
 - **Serial Console**: Text-based access for troubleshooting unresponsive VMs (requires boot diagnostics)
 - **Reset access**: VM → **Help** → **Reset password** (if locked out)
+
+### 🏰 Azure Bastion
+
+- **Purpose**: Secure browser-based RDP/SSH to VMs without public IPs, no NSG rules needed, protects against port scanning
+- **Creation settings**:
+  - **Availability zone**: Select zone for redundancy (or none)
+  - **Tier**: Developer, Basic, Standard, Premium
+  - **Instance count**: Number of scale units (Standard/Premium only)
+  - **Virtual network**: Must be in the same VNet as target VMs
+  - **Subnet**: Requires dedicated subnet named `AzureBastionSubnet` (minimum /26)
+- **Connect via Bastion**: VM → **Connect** → **Bastion** → Enter credentials → **Connect**
 
 ### 💾 Adding Data Disks
 
@@ -170,6 +184,60 @@ Four major categories:
 - **After attaching**: Must initialize and format disk inside VM (Windows: Disk Management, Linux: `fdisk`/`mkfs`)
 - **Max disks**: Limited by VM size (check VM specs for maximum data disk count)
 - **Detach**: Can detach and reattach to different VMs (same region)
+
+### 📈 Virtual Machine Scale Sets (VMSS)
+
+- **Purpose**: Auto-scaling group of identical VMs with built-in load balancing and availability zone support
+
+#### VMSS Creation
+
+Most settings similar to regular VM creation.
+
+**Basics Tab:**
+
+- **Orchestration mode**:
+  - **Flexible**: Mix VM sizes, more control but requires manual configuration
+  - **Uniform**: Identical VMs optimized for large-scale workloads
+- **Scaling mode**:
+  - **Manual**: Set fixed instance count
+  - **Autoscaling**: Scale based on metrics (CPU, memory, schedule)
+  - **No scaling profile**: Create empty scale set
+- **Instance count**: Initial number of VMs, minimum 2 for high availability
+
+**Spot Tab:**
+
+- **Spot VMs**: Use Azure's excess capacity at discounted prices (up to 90% off), can be evicted anytime
+- **Eviction type**:
+  - **Capacity only**: Evict when Azure needs capacity
+  - **Price or capacity**: Evict when capacity needed or price exceeds max
+- **Eviction policy**: Stop/Deallocate or Delete
+- **Try to restore instances**: Attempt to recreate evicted Spot VMs when capacity available
+
+**Disks Tab:** Similar to VM (OS disk type, encryption, data disks)
+
+**Networking Tab:** Similar to VM (VNet, subnet, NSG, load balancing)
+
+**Management Tab:** Similar to VM, plus:
+
+- **Enable standby pools**: Pre-provisioned instances ready to scale quickly
+- **Enable overprovisioning**: Create extra VMs during scaling, delete extras after success (faster scaling)
+
+**Health Tab:**
+
+- **Enable application health monitoring**: Monitor app health via extension or load balancer probes
+- **Resilient VM create/delete**: Retry failed operations automatically
+- **Automatic instance repairs**: Replace unhealthy instances automatically
+- **Repair actions**: Reimage, Restart, or Replace (when health monitoring enabled)
+- **Grace period**: Wait time before monitoring starts (allow app to initialize)
+
+**Advanced Tab:** Similar to VM (extensions, custom data, proximity placement groups)
+
+#### Managing VMSS
+
+- **Instances**: View all VM instances, their status, and details (VMSS → **Instances** in left menu)
+- **Scaling**: VMSS → **Availability + scale** → **Scaling** (manual scaling or configure autoscaling)
+  - **Autoscaling**: Define rules based on metrics (e.g., scale up if CPU > X%, scale down if memory < Y%), set min/max/default instance counts
+- **CLI manual scaling**: `az vmss scale --new-capacity <count> --name <vmss-name> --resource-group <rg-name>`
 
 ## 📦 Azure Storage
 
@@ -478,6 +546,90 @@ Four major categories:
 - Azure validates move compatibility before allowing the operation
 
 ![tenant-sub-resourcegroup](assets/tenant-sub-resourcegroup.jpg)
+
+## 📜 Azure Resource Manager (ARM)
+
+- **What it is**: Deployment and management layer for all Azure resources (every action goes through ARM)
+- **ARM Templates**: JSON files for repeatable infrastructure deployments
+  - **Template file**: Resource definitions with `parameters` section
+  - **Parameters file**: Define parameter values separately (reuse templates with different configs)
+- **Get templates**: In **Review + Create** → **Download a template for automation**
+- **View past deployments**: Resource group → **Settings** → **Deployments**
+
+**Sample ARM Template (template.json):**
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/...", // Schema version
+  "contentVersion": "1.0.0.0", // Your template version
+  "parameters": {
+    // Configurable inputs (values from parameters.json)
+    "environment": {
+      "type": "string",
+      "defaultValue": "dev"
+    },
+    "skuName": {
+      "type": "string" // No default - must be in parameters.json
+    }
+  },
+  "variables": {
+    // Reusable values within template
+    "location": "[resourceGroup().location]", // Built-in function
+    "storageName": "[concat('storage', parameters('environment'))]" // concat() joins strings
+  },
+  "resources": [
+    // Resources to deploy
+    {
+      // Find type & apiVersion: Azure docs or download template from portal
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-02-01",
+      "name": "[variables('storageName')]",
+      "location": "[variables('location')]",
+      // Find available properties: Review+Create → View automation template
+      "sku": { "name": "[parameters('skuName')]" }, // Value from parameters.json
+      "kind": "StorageV2"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "apiVersion": "2021-02-01",
+      "name": "[concat(variables('storageName'), '/default/mycontainer')]",
+      "dependsOn": [
+        // Wait for storage account to be created first
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    // Return values after deployment
+    "storageEndpoint": {
+      "type": "string",
+      "value": "[reference(variables('storageName')).primaryEndpoints.blob]"
+    }
+  }
+}
+```
+
+**Sample Parameters File (parameters.json):**
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/.../deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environment": { "value": "prod" },
+    "skuName": { "value": "Standard_GRS" }
+  }
+}
+```
+
+**Modifying templates**: When removing or duplicating resources, update all related references:
+
+- Remove/update `dependsOn` references in other resources
+- Remove/update `variables` that reference the changed resource
+- Update `outputs` that use `reference()` to the changed resource
+- Example: Removing a Public IP? Update the NIC that references it, and any outputs using it
+
+**Common ARM functions**: `concat()`, `parameters()`, `variables()`, `resourceGroup()`, `reference()`, `uniqueString()`, `resourceId()`
 
 ## 💰 Cost centre
 
