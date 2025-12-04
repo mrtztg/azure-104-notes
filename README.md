@@ -564,46 +564,69 @@ Most settings similar to regular VM creation.
   "contentVersion": "1.0.0.0", // Your template version
   "parameters": {
     // Configurable inputs (values from parameters.json)
-    "environment": {
+    "vmName": {
       "type": "string",
-      "defaultValue": "dev"
+      "defaultValue": "myVM"
     },
-    "skuName": {
+    "vmSize": {
       "type": "string" // No default - must be in parameters.json
+    },
+    "vmCount": {
+      "type": "int",
+      "defaultValue": 2
     }
   },
   "variables": {
     // Reusable values within template
-    "location": "[resourceGroup().location]", // Built-in function
-    "storageName": "[concat('storage', parameters('environment'))]" // concat() joins strings
+    "location": "[resourceGroup().location]" // Built-in function
   },
   "resources": [
     // Resources to deploy
     {
       // Find type & apiVersion: Azure docs or download template from portal
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2021-02-01",
-      "name": "[variables('storageName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2023-03-01",
+      "name": "[concat(parameters('vmName'), copyIndex(1))]", // myVM1, myVM2, myVM3...
       "location": "[variables('location')]",
+      "copy": {
+        // Replicate this resource multiple times
+        "name": "vmCopy",
+        "count": "[parameters('vmCount')]" // Creates vmCount number of VMs
+      },
       // Find available properties: Review+Create → View automation template
-      "sku": { "name": "[parameters('skuName')]" }, // Value from parameters.json
-      "kind": "StorageV2"
+      "properties": {
+        "hardwareProfile": { "vmSize": "[parameters('vmSize')]" } // Value from parameters.json
+      }
     },
     {
-      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-      "apiVersion": "2021-02-01",
-      "name": "[concat(variables('storageName'), '/default/mycontainer')]",
-      "dependsOn": [
-        // Wait for storage account to be created first
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
-      ]
+      // VM Extension for running scripts after VM creation
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2023-03-01",
+      "name": "[concat(parameters('vmName'), copyIndex(1), '/customScript')]",
+      "location": "[variables('location')]",
+      "copy": {
+        "name": "extensionCopy",
+        "count": "[parameters('vmCount')]"
+      },
+      "dependsOn": ["vmCopy"], // Wait for all VMs to be created
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension", // Windows (use "CustomScript" for Linux)
+        "typeHandlerVersion": "1.10",
+        "settings": {
+          "fileUris": [
+            "https://storage.blob.core.windows.net/scripts/install.ps1"
+          ],
+          "commandToExecute": "powershell -ExecutionPolicy Unrestricted -File install.ps1"
+        }
+      }
     }
   ],
   "outputs": {
     // Return values after deployment
-    "storageEndpoint": {
+    "vmId": {
       "type": "string",
-      "value": "[reference(variables('storageName')).primaryEndpoints.blob]"
+      "value": "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('vmName'), '1'))]"
     }
   }
 }
@@ -616,8 +639,11 @@ Most settings similar to regular VM creation.
   "$schema": "https://schema.management.azure.com/.../deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "environment": { "value": "prod" },
-    "skuName": { "value": "Standard_GRS" }
+    "vmName": { "value": "prodVM" },
+    "vmSize": { "value": "Standard_D2s_v3" },
+    "vmCount": { "value": 3 }
+  }
+}
   }
 }
 ```
@@ -630,6 +656,25 @@ Most settings similar to regular VM creation.
 - Example: Removing a Public IP? Update the NIC that references it, and any outputs using it
 
 **Common ARM functions**: `concat()`, `parameters()`, `variables()`, `resourceGroup()`, `reference()`, `uniqueString()`, `resourceId()`
+
+### Template Specs
+
+- **What it is**: Import and store templates in Azure for reuse
+- **View templates**: Resource group → **Settings** → **Deployments** (hidden types), or search **Template specs** in portal
+  - **Note**: Templates in Deployments reflect the original deployment, not current resource state. Changes made after deployment (e.g., resizing a VM) are not reflected and won't appear in the Deployments list
+- **Deploy from template**: Open template → **Deploy** (top menu) → Fill in parameter values
+- **Deploy via CLI** (also works in PowerShell):
+  ```bash
+  az deployment group create --resource-group <rg> --name <deployment-name> --template-file <template.json> --parameters <parameters.json>
+  ```
+- **Deploy via PowerShell**:
+  ```powershell
+  New-AzResourceGroupDeployment -ResourceGroupName "<rg>" -TemplateFile "<template.json>" -TemplateParameterFile "<parameters.json>"
+  ```
+  - Skips resources that already exist (incremental deployment by default)
+  - Fill required values in parameters file (e.g., passwords) — template export skips sensitive fields
+- **Tip**: For constant values you don't want to provide every deployment, move them from `parameters` to `variables`
+- **Other IaC tools** (not in exam): Azure Bicep, Terraform
 
 ## 💰 Cost centre
 
