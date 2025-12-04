@@ -708,6 +708,54 @@ Most settings similar to regular VM creation.
 - **Tip**: For constant values you don't want to provide every deployment, move them from `parameters` to `variables`
 - **Other IaC tools** (not in exam): Azure Bicep, Terraform
 
+### Bicep
+
+- **What it is**: Domain-specific language (DSL) that compiles to ARM templates, cleaner syntax than JSON
+- **Behind the scenes**: Bicep compiles to ARM JSON — viewing deployment template in portal shows ARM template, not Bicep
+- **Decompile ARM to Bicep**:
+  - **CLI**: `az bicep decompile --file <template.json>`
+  - **VS Code**: Open ARM JSON file → Command Palette → **Bicep: Decompile into Bicep**
+- **Sample Bicep files**: https://learn.microsoft.com/en-us/samples/browse/?languages=bicep&terms=bicep
+- **VS Code extension**: Install "Bicep" extension for syntax highlighting, validation, and IntelliSense
+- **Deploy from VS Code**: Install Azure Tools extension → Right-click `.bicep` file → **Deploy Bicep File** (must be logged into Azure)
+- **Deploy via CLI**: `az deployment group create --resource-group <rg> --template-file <file.bicep>`
+
+**Sample Bicep File (storage.bicep):**
+
+```bicep
+@description('Storage Account Type')
+@allowed([
+  'Premium_LRS'
+  'Premium_ZRS'
+  'Standard_GRS'
+  'Standard_GZRS'
+  'Standard_LRS'
+  'Standard_RAGRS'
+  'Standard_RAGZRS'
+  'Standard_ZRS'
+])
+param storageAccountType string = 'Standard_LRS'
+
+@description('The storage account location.')
+param location string = resourceGroup().location
+
+@description('The name of the storage account.')
+param storageAccountName string = 'store${uniqueString(resourceGroup().id)}'
+
+resource sa 'Microsoft.Storage/storageAccounts@2025-06-01' = {
+  kind: 'StorageV2'
+  location: location
+  sku: {
+    name: storageAccountType
+  }
+  name: storageAccountName
+  properties: {}
+}
+
+output storageAccountName string = storageAccountName
+output storageAccountId string = sa.id
+```
+
 ## 💰 Cost centre
 
 ### 💵 Setting Cost Budgets in Azure
