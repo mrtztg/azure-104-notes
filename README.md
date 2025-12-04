@@ -555,6 +555,7 @@ Most settings similar to regular VM creation.
   - **Parameters file**: Define parameter values separately (reuse templates with different configs)
 - **Get templates**: In **Review + Create** → **Download a template for automation**
 - **View past deployments**: Resource group → **Settings** → **Deployments**
+- **Official sample templates**: https://github.com/Azure/azure-quickstart-templates
 
 **Sample ARM Template (template.json):**
 
@@ -574,13 +575,31 @@ Most settings similar to regular VM creation.
     "vmCount": {
       "type": "int",
       "defaultValue": 2
+    },
+    "vhdUri": {
+      "type": "string" // URI to VHD in storage account (for importing custom images)
     }
   },
   "variables": {
     // Reusable values within template
-    "location": "[resourceGroup().location]" // Built-in function
+    "location": "[resourceGroup().location]", // Built-in function
+    "diskName": "[concat(parameters('vmName'), '-osdisk')]"
   },
   "resources": [
+    // Managed Disk imported from VHD
+    {
+      "type": "Microsoft.Compute/disks",
+      "apiVersion": "2023-01-02",
+      "name": "[variables('diskName')]",
+      "location": "[variables('location')]",
+      "properties": {
+        "osType": "Windows", // or "Linux"
+        "creationData": {
+          "createOption": "Import", // Import VHD from storage account
+          "sourceUri": "[parameters('vhdUri')]" // VHD blob URI
+        }
+      }
+    },
     // Resources to deploy
     {
       // Find type & apiVersion: Azure docs or download template from portal
@@ -588,6 +607,10 @@ Most settings similar to regular VM creation.
       "apiVersion": "2023-03-01",
       "name": "[concat(parameters('vmName'), copyIndex(1))]", // myVM1, myVM2, myVM3...
       "location": "[variables('location')]",
+      "dependsOn": [
+        // Wait for disk to be created first
+        "[resourceId('Microsoft.Compute/disks', variables('diskName'))]"
+      ],
       "copy": {
         // Replicate this resource multiple times
         "name": "vmCopy",
@@ -595,7 +618,16 @@ Most settings similar to regular VM creation.
       },
       // Find available properties: Review+Create → View automation template
       "properties": {
-        "hardwareProfile": { "vmSize": "[parameters('vmSize')]" } // Value from parameters.json
+        "hardwareProfile": { "vmSize": "[parameters('vmSize')]" },
+        "storageProfile": {
+          "osDisk": {
+            "osType": "Windows",
+            "createOption": "Attach", // Attach existing managed disk
+            "managedDisk": {
+              "id": "[resourceId('Microsoft.Compute/disks', variables('diskName'))]"
+            }
+          }
+        }
       }
     },
     {
