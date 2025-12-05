@@ -104,9 +104,26 @@ Four major categories:
 **Disks Tab:**
 
 - **OS disk type**: Premium SSD, Standard SSD, Standard HDD
-- **Encryption at host**: Encrypts data at rest on VM host (Additional encryption by OS. Is not required, unless you want maximum encryption)
+- **Encryption at host**: Encrypts data at rest on VM host (double encryption with platform key)
+  - **Enable feature**: Run `Register-AzProviderFeature -FeatureName "EncryptionAtHost" -ProviderNamespace "Microsoft.Compute"` first
 - **Delete with VM**: Auto-delete disk when VM deleted
 - **Key management**: Platform-managed key (PMK) or Customer-managed key (CMK)
+  - **CMK setup**: Select a **Disk Encryption Set** (must be in same region as VM)
+  - **Prerequisites for CMK** (create in this order):
+    1. **Key Vault**: Create with purge protection enabled (**Settings** → **Properties** → **Enable purge protection**)
+       - Set **Days to retain deleted vaults** as needed
+       - **Access configuration**: Enable checkboxes to allow services to access keys:
+         - **Azure VMs for deployment**: VMs can retrieve certificates/keys
+         - **Azure Resource Manager for template deployment**: ARM can access keys during deployments
+         - **Azure Disk Encryption for volume encryption**: Required for disk encryption with CMK
+    2. **Key**: Key Vault → **Objects** → **Keys** → **Generate/Import** (requires Key Vault Administrator role)
+    3. **Disk Encryption Set**: Create with encryption type "...with a customer-managed key", select Key Vault and Key
+       - If alert appears ("To associate a disk, image..."), click to resolve
+  - **Enable encryption on existing VM**: VM → **Settings** → **Disks** (shows current encryption status per disk)
+    - Click **Additional settings** (top menu) → Select **Disks to encrypt** (None, OS disk, OS and data disks)
+    - Choose Key Vault and Key (if no Key selected, new one created automatically)
+    - Key Vault only needs **Azure Disk Encryption for volume encryption** checkbox enabled
+    - VM restart required to apply encryption
 - **Enable Ultra Disk compatibility**: Allows attaching Ultra Disks for highest performance
 - **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
 
