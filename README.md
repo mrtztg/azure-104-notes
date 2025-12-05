@@ -70,6 +70,75 @@ Four major categories:
 - **Metrics and Logs**: Network performance and diagnostic logging
 - **Packet Capture**: Capture network traffic for analysis
 
+## 🌐 Azure App Service
+
+- **What it is**: Fully managed PaaS for hosting web apps, REST APIs, and mobile backends
+- **Benefits**: No infrastructure management, built-in auto-scaling, CI/CD support, multi-language (.NET, Java, Node.js, Python, PHP)
+- **App Service Plan**: Defines compute resources; multiple apps can share one plan
+  - **Tiers**: Free, Shared, Basic, Standard, Premium, Isolated (higher tiers unlock auto-scale, deployment slots, VNet integration)
+- **Deployment slots**: Staging environments to test before swapping to production (Standard+)
+
+### Create Web App
+
+**Basics Tab:**
+
+- **Name**: Must be globally unique (becomes `<name>.azurewebsites.net`)
+- **Publish type**:
+  - **Code**: Deploy application code directly; select runtime stack (.NET, Java, Node.js, Python, PHP) and OS (Windows/Linux)
+  - **Container**: Deploy Docker container image; select OS and container registry
+  - **Static Web App**: For static HTML/CSS/JS sites with serverless APIs
+- **Operating System**: Windows or Linux (depends on runtime stack)
+- **Pricing plan**: Choose based on needs
+  - Premium plans enable **Zone Redundancy** option for high availability across availability zones
+
+**Database Tab:**
+
+- **Create a database**: Check to provision a database with the web app
+  - Configure database type and details (Azure SQL, MySQL, PostgreSQL, etc.)
+- **Azure Cache for Redis**: Enable caching for improved performance (available when database creation is enabled)
+
+**Deployment Tab:**
+
+- **Continuous deployment**: Enable to auto-deploy on code changes
+  - Connect to GitHub account, select organization, repository, and branch
+  - Azure creates GitHub Actions workflow for CI/CD pipeline
+- **Authentication settings**: Configure whether the web app requires authentication
+  - **Enable**: Users must authenticate before accessing the app (integrates with Entra ID, social providers, etc.)
+  - **Disable**: App is publicly accessible without authentication
+
+**Networking Tab:**
+
+- **Enable public access**: On/Off toggle for public internet accessibility
+- **Enable virtual network integration**: Connect the web app to an Azure VNet for secure access to VNet resources (databases, VMs, private endpoints)
+
+**Monitor + Secure Tab:**
+
+- **Enable Application Insights**: Turn on application performance monitoring (APM) for diagnostics, logging, and telemetry
+- **Enable Defender for App Service**: Microsoft Defender protection for threat detection and security recommendations
+
+> **Cost Note**: App Service pricing is comparable to running a VM, but includes managed infrastructure, patching, scaling, and availability features.
+
+### Post-Creation Configuration
+
+**Deployment Center** (Settings → Deployment → Deployment Center):
+
+- Configure deployment source after web app creation
+- **Source options**: GitHub, Bitbucket, Azure Repos, Local Git, External Git, Containers, FTPS
+  - VS Code uses FTPS protocol for deployments
+
+**Deployment Slots** (Deployment → Deployment slots):
+
+- Create separate environments (e.g., staging, testing, QA) for the same web app
+- **Use cases**:
+  - **Staging environment**: Test new versions before production
+  - **A/B testing**: Compare different versions with real users
+  - **Blue/green deployments**: Zero-downtime deployments by swapping slots
+  - **Rollback**: Quickly revert by swapping back to previous slot
+- **Workflow**: Deploy new version to staging slot → Test → Click **Swap** (top menu) to switch staging with production
+- **Traffic splitting**: Use **Traffic %** column in slots list to distribute traffic between slots
+  - Gradually route traffic to new version (e.g., 10% → 25% → 50% → 100%)
+  - Enables canary deployments and gradual rollouts
+
 ## 🖥️ Azure Virtual Machines (VMs)
 
 ### VM Creation
