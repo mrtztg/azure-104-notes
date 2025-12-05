@@ -161,6 +161,28 @@ Four major categories:
 - **Custom backups**: Click **Configure** (top menu) to store backups in Azure Storage
   - **Advanced tab**: Option to include database backups
 
+**Networking** (Settings → Networking):
+
+- **Inbound traffic**:
+  - **Public network access**: Enable for all networks (no restriction), selected VNets/IPs, or disable
+    - Advanced filtering: CIDR blocks, headers, X-Forwarded-For, Azure-FDID
+  - **Inbound addresses**: IPs clients use to reach your app (whitelist in external firewalls/services)
+  - **App assigned address**: Set custom domain (also in Settings → Custom domains)
+- **Outbound traffic**:
+  - **VNet integration**: Connect app to a VNet to access private resources (VMs, databases)
+    - For VNets in other regions, requires site-to-site VPN
+  - **Outbound addresses**: IPs your app uses for outbound calls (whitelist in destination services/databases)
+
+**Custom Domains** (Settings → Custom domains):
+
+- **Add custom domain**: Use your own already registered domain
+- **Buy App Service domain**: Purchase a domain directly through Azure
+- **SSL/TLS binding**: After adding domain, click **Add Binding** → Select certificate → Choose TLS/SSL type:
+  - **SNI SSL**: Multiple SSL sites share same IP (modern browsers, most common)
+  - **IP-based SSL**: Dedicated IP per SSL certificate (legacy clients, higher cost)
+
+**Certificates** (Settings → Certificates): Managed (free, auto-renewed), Bring your own (.pfx), or Public key (.cer)
+
 ## 🖥️ Azure Virtual Machines (VMs)
 
 ### VM Creation
