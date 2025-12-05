@@ -70,6 +70,42 @@ Four major categories:
 - **Metrics and Logs**: Network performance and diagnostic logging
 - **Packet Capture**: Capture network traffic for analysis
 
+## 📦 Azure Containers
+
+Azure offers multiple ways to run containers:
+
+- **App Service (Container)**: Deploy containers as web apps with App Service features
+- **Azure Kubernetes Service (AKS)**: Managed Kubernetes for orchestrating containerized apps at scale
+- **Azure Container Instances (ACI)**: Fastest way to run containers, no orchestration
+- **Azure Container Apps**: Serverless containers with auto-scaling, built on Kubernetes
+
+### Container Instances (ACI)
+
+- **What it is**: Fastest way to spin up containers in Azure, no VM management
+- **Limitations**: Not scalable, no orchestration — suited for quick tests, dev/sandbox, not production workloads
+
+**Basics Tab:**
+
+- **SKU**: Standard or Confidential (encrypted memory)
+- **Image source**: Quickstart images, Azure Container Registry, or Other registry (Docker Hub, etc.)
+
+**Networking Tab:**
+
+- **Networking type**: Public, Private, or None
+- **DNS name label**: Custom DNS prefix for public access
+- **DNS name label scope reuse**: Control label uniqueness
+- **Ports**: Define exposed container ports
+
+**Advanced Tab:**
+
+- **Restart policy**: Always, On failure, or Never
+- **Environment variables**: Pass config to container at runtime
+
+**Post-Creation (Settings → Containers):**
+
+- View container status, state, and restart count
+- **Events tab**: See container events (image pull, container start, etc.)
+
 ## 🌐 Azure App Service
 
 - **What it is**: Fully managed PaaS for hosting web apps, REST APIs, and mobile backends
