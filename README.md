@@ -128,16 +128,38 @@ Four major categories:
 
 **Deployment Slots** (Deployment → Deployment slots):
 
-- Create separate environments (e.g., staging, testing, QA) for the same web app
-- **Use cases**:
-  - **Staging environment**: Test new versions before production
-  - **A/B testing**: Compare different versions with real users
-  - **Blue/green deployments**: Zero-downtime deployments by swapping slots
-  - **Rollback**: Quickly revert by swapping back to previous slot
-- **Workflow**: Deploy new version to staging slot → Test → Click **Swap** (top menu) to switch staging with production
-- **Traffic splitting**: Use **Traffic %** column in slots list to distribute traffic between slots
-  - Gradually route traffic to new version (e.g., 10% → 25% → 50% → 100%)
-  - Enables canary deployments and gradual rollouts
+- Create separate environments (staging, QA) for zero-downtime deployments
+- **Use cases**: Staging/testing, A/B testing, blue/green deployments, quick rollback
+- **Swap**: Deploy to staging → Test → Click **Swap** to switch with production
+- **Traffic %**: Distribute traffic between slots for gradual rollouts (canary deployments)
+
+**Environment Variables** (Settings → Environment variables):
+
+- **App settings**: Define app settings (e.g., `API_KEY`) accessible as environment variables
+- **Connection strings**: Add database/cache connection strings
+- When adding either, **Deployment slot setting** checkbox keeps the value with the slot during swap
+
+**Configuration** (Settings → Configuration):
+
+- **General settings**: HTTP version, Web sockets, Always On, Session affinity (ARR), Min TLS version
+- **Stack settings**: Runtime stack (.NET, Java, Node.js, Python) and version
+- **Default documents**: Pages served when no file specified in URL (e.g., `index.html`, `default.aspx`)
+- **Path mappings**: Map URL paths to virtual directories or mount Azure Storage as directories
+
+**Scaling** (App Service Plan menu):
+
+- **Scale Up** (vertical): Change server size/tier (switch between Hardware and Features tabs on top)
+- **Scale Out** (horizontal): Increase/decrease number of instances (max depends on plan tier)
+  - **Manual**: Set fixed instance count
+  - **Automatic**: Define max burst and always-ready instances
+  - **Rules based**: Scale on metrics like CPU, memory (similar to VMSS)
+  - Some options may be disabled for lower-tier plans
+
+**Backups** (Settings → Backups):
+
+- **Automatic backups**: Every hour, up to 30 days retention, max 30 GB (excludes databases)
+- **Custom backups**: Click **Configure** (top menu) to store backups in Azure Storage
+  - **Advanced tab**: Option to include database backups
 
 ## 🖥️ Azure Virtual Machines (VMs)
 
