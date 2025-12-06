@@ -107,6 +107,48 @@ Azure offers multiple ways to run containers:
 - View container status, state, and restart count
 - **Events tab**: See container events (image pull, container start, etc.)
 
+**Container Groups (CLI/PowerShell only):**
+
+- Deploy multiple containers together (like Kubernetes sidecars) — **not available in Azure Portal**
+- **Use case**: Main app container + logging/monitoring sidecar container
+- **Deploy via CLI**:
+  1. Create ARM template JSON file in Cloud Shell: `code container-group.json`
+     - Template example: [Microsoft Docs - Multi-container group](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-multi-container-group#configure-a-template)
+  2. Deploy: `az deployment group create --resource-group <rg> --template-file container-group.json`
+  3. View: `az container show --resource-group <rg> --name <container-group-name> --output table`
+- After deployment, containers visible in ACI resource → **Settings → Containers**
+
+### Container Apps
+
+- Serverless container platform built on Kubernetes — less management than AKS, but less flexibility
+- **Use cases**: Microservices, APIs, event-driven apps with auto-scaling
+
+#### Create Container App
+
+**Basics Tab:**
+
+- **Container Apps Environment**: Create new or select existing
+  - Zone redundancy, workload profiles, monitoring
+  - Networking: Public access, use your own VNet, enable private endpoint
+
+**Container Tab:**
+
+- **Image source**: Quickstart image or custom image (ACR, Docker Hub)
+- **Configuration**: Image name, tag, workload profile, GPU, environment variables
+
+**Ingress Tab:**
+
+- **Ingress traffic**: Limited to Container Apps environment or accept from anywhere
+- **Ingress type**: HTTP or TCP
+- **Session affinity**: Enable sticky sessions
+
+#### Post-Creation
+
+- **Networking → Ingress**: Modify ingress settings after creation
+- **Application → Containers**: View containers, properties, env variables, health probes
+- **Application → Revisions and replicas**: View revision history, create new revisions
+- **Application → Scale**: Define min/max replicas for auto-scaling
+
 ## 🌐 Azure App Service
 
 - **What it is**: Fully managed PaaS for hosting web apps, REST APIs, and mobile backends
