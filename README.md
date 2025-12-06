@@ -108,6 +108,27 @@ Four major categories:
 - Define **Inbound rules** (traffic coming in) and **Outbound rules** (traffic going out)
 - Rules specify: Priority, Source/Destination (IP, Service Tag, ASG), Port, Protocol, Action (Allow/Deny)
 
+### VNet Peering
+
+- By default, resources in different VNets **cannot communicate** with each other
+- **Peering** connects two VNets, allowing resources to communicate as if on the same network
+- **Requirements**: Subnet IP address ranges must **not overlap** between peered VNets
+- **Hub-Spoke topology**: For complex networks, use a central "hub" VNet peered with multiple "spoke" VNets
+
+#### Creating a Peering
+
+- Navigate to VNet → **Settings → Peerings** → **Add** (top menu)
+- Select target VNet (or enter its Resource ID for cross-subscription/tenant peering)
+- **Two-way configuration**: The screen has two sections — one for each direction:
+  - **This VNet to remote VNet**: Configure access from this VNet to the peered VNet
+  - **Remote VNet to this VNet**: Configure access from the peered VNet to this VNet
+- **Peering options** (for each direction):
+  - **Allow access**: Allow the peered VNet to access resources in this VNet
+  - **Allow forwarded traffic**: Allow traffic forwarded from other networks (useful for Hub-Spoke with NVA/firewall)
+  - **Allow gateway transit**: Share VPN/ExpressRoute gateway with peered VNet
+- **After saving**: Azure creates a peering connection in **both** VNets (if both directions enabled)
+- **Note**: NSG rules may still block traffic even after peering is established
+
 ## 📦 Azure Containers
 
 Azure offers multiple ways to run containers:
