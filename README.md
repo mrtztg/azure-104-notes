@@ -79,6 +79,20 @@ Azure offers multiple ways to run containers:
 - **Azure Container Instances (ACI)**: Fastest way to run containers, no orchestration
 - **Azure Container Apps**: Serverless containers with auto-scaling, built on Kubernetes
 
+### Azure Container Registry (ACR)
+
+- Private registry for storing container images (Docker, Helm charts, OCI artifacts)
+- **Tiers**: Basic (limited), Standard (production), Premium (geo-replication, private endpoints, CMK)
+
+**Publishing Images to ACR:**
+
+- **Visual Studio**: Build → Publish Docker → Select Azure Container Registry
+- **Docker CLI**:
+  1. List registries: `az acr list --output table`
+  2. Login to ACR (authenticates Docker): `az acr login --name <acr-name>`
+  3. Tag image for ACR: `docker tag nginx <acr-name>.azurecr.io/nginx`
+  4. Push to ACR: `docker push <acr-name>.azurecr.io/nginx`
+
 ### Container Instances (ACI)
 
 - **What it is**: Fastest way to spin up containers in Azure, no VM management
