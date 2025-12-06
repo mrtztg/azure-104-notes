@@ -82,7 +82,8 @@ Azure offers multiple ways to run containers:
 ### Container Instances (ACI)
 
 - **What it is**: Fastest way to spin up containers in Azure, no VM management
-- **Limitations**: Not scalable, no orchestration — suited for quick tests, dev/sandbox, not production workloads
+- **Limitations**: No built-in scaling or orchestration — **to scale, create additional instances manually**
+- **Use cases**: Quick tests, dev/sandbox environments, not production workloads
 
 **Basics Tab:**
 
@@ -948,6 +949,8 @@ Budgets help monitor and control spending by sending alerts and taking automated
 > **Exam Tip**: Leave enough time for performance-based CLI tasks in the exam.
 
 - CLI and PowerShell commands follow understandable patterns
+- **Azure Cloud Shell**: Browser-based shell with Bash and PowerShell, pre-authenticated
+  - Has built-in VS Code editor: use `code <filename>` to open and edit files
 - **Azure CLI (Bash)**: `az <service> <action>` pattern
   - Examples: `az vm list`, `az vm create`, `az vm delete`
   - Examples: `az network vnet list`, `az network vnet create`, `az network vnet delete`
