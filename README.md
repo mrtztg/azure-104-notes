@@ -48,7 +48,7 @@ Four major categories:
 
 #### Security
 
-- **Network Security Groups (NSGs)**: Firewall rules for subnet and NIC level traffic control
+- **Network Security Groups (NSGs)**: Firewall rules for subnet and NIC level traffic control (inbound and outbound rules)
 - **Private Link**: Private connectivity to Azure services via Private Endpoints
 - **DDoS Protection**: Protection against distributed denial-of-service attacks
 - **Azure Firewall**: Managed network security service with application and network-level filtering
@@ -69,6 +69,44 @@ Four major categories:
 - **Network Watcher**: Network monitoring and diagnostics tool
 - **Metrics and Logs**: Network performance and diagnostic logging
 - **Packet Capture**: Capture network traffic for analysis
+
+## 🔗 Azure Virtual Network (VNet)
+
+- Isolated private network for connecting Azure resources — most compute resources require a VNet
+- Resources can communicate with each other, internet, and on-premises networks
+- When creating a VM with a VNet: Azure assigns a **private IP** from the subnet, creates a **Network Interface (NIC)**, and optionally a **public IP**
+- **Cost**: VNet itself is free
+
+### Create VNet
+
+- **Basics Tab**: Region matters — VNets only attach to compute resources in the **same region**
+- **Security Tab**: Enable Bastion, Firewall, DDoS Network Protection, Virtual Network encryption (encrypt traffic within VNet)
+- **IP Addresses Tab**: Define address space and subnets
+  - If Bastion/Firewall enabled, Azure auto-creates their subnets
+  - **Multiple subnets**: Separate tiers, isolate workloads, apply different NSGs
+
+### Post-Creation
+
+- **Settings → Subnets**: Add, remove, or modify subnets after VNet creation
+
+### Public IP Address
+
+- Separate Azure resource with **hourly cost** — search "Public IP address" in portal to create
+- **Basics Tab**: Region, Availability Zone, Tier, Routing preference — should match the load balancer if associating with one
+  - **DNS name label**: Optional custom DNS prefix
+- **DDoS Protection Tab**:
+  - **Network**: Inherits DDoS protection from associated VNet
+  - **IP**: Dedicated DDoS protection for this IP
+  - **Disable**: No DDoS protection
+- **After creation**: Click **Associate** (top menu) to attach to a NIC or Load Balancer
+  - Alternatively: Go to NIC → **Settings → IP configurations** → Click config → Associate public IP
+- **Note**: Assigning a public IP doesn't automatically expose the VM — NSG rules may still block access
+
+### Network Security Groups (NSGs)
+
+- Firewall rules at subnet or NIC level
+- Define **Inbound rules** (traffic coming in) and **Outbound rules** (traffic going out)
+- Rules specify: Priority, Source/Destination (IP, Service Tag, ASG), Port, Protocol, Action (Allow/Deny)
 
 ## 📦 Azure Containers
 
