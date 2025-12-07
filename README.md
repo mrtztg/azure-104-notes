@@ -114,11 +114,16 @@ Four major categories:
 - **Peering** connects two VNets, allowing resources to communicate as if on the same network
 - **Requirements**: Subnet IP address ranges must **not overlap** between peered VNets
 - **Hub-Spoke topology**: For complex networks, use a central "hub" VNet peered with multiple "spoke" VNets
+- **Global peering**: Peering works across regions (e.g., Japan to US) — same setup process
+- **Cost**: Data transfer between peered VNets has cost (inbound + outbound)
+  - Same region: Lower cost
+  - Cross-region (global peering): Significantly higher cost
+  - Pricing: https://azure.microsoft.com/en-gb/pricing/details/virtual-network/
 
 #### Creating a Peering
 
 - Navigate to VNet → **Settings → Peerings** → **Add** (top menu)
-- Select target VNet (or enter its Resource ID for cross-subscription/tenant peering)
+- Select target VNet (or enter its **Resource ID for cross-subscription/tenant peering**)
 - **Two-way configuration**: The screen has two sections — one for each direction:
   - **This VNet to remote VNet**: Configure access from this VNet to the peered VNet
   - **Remote VNet to this VNet**: Configure access from the peered VNet to this VNet
@@ -128,6 +133,37 @@ Four major categories:
   - **Allow gateway transit**: Share VPN/ExpressRoute gateway with peered VNet
 - **After saving**: Azure creates a peering connection in **both** VNets (if both directions enabled)
 - **Note**: NSG rules may still block traffic even after peering is established
+
+### VNet Gateway (VNet-to-VNet Connection)
+
+- Alternative to peering for connecting VNets across regions — also used for Site-to-Site (S2S) and Point-to-Site (P2S) VPN
+- **Cost advantage**: Gateway cost + **outbound traffic only** (no inbound cost) — can be cheaper than global peering if gateway already exists for VPN
+  - Pricing: https://azure.microsoft.com/en-us/pricing/details/vpn-gateway/
+
+#### Setup Steps
+
+1. **Create Gateway Subnet** (in both VNets):
+   - VNet → **Settings → Subnets** → **+ Gateway subnet**
+   - Subnet name is always `GatewaySubnet` (fixed by Azure)
+2. **Create VNet Gateway** (in both VNets):
+   - Search "Virtual network gateway" → Create
+   - Select the VNet and its `GatewaySubnet`
+   - SKU affects cost and performance
+3. **Create Connection** (in both gateways):
+   - Gateway → **Settings → Connections** → **+ Add**
+   - Connection type: VNet-to-VNet
+   - Select the other gateway as target
+   - **Shared Key (PSK)**: Must be **identical** on both sides
+   - Connection establishes only when configured on **both** gateways
+
+- **Cross-subscription**: VNet-to-VNet gateway connections between subscriptions require **PowerShell** (not available in portal)
+
+### Name Resolution
+
+- **BYO DNS (Bring Your Own)**: Use your own DNS server (on-premises or VM-hosted) — domain/subdomain resolution already handled before reaching Azure
+- **Azure Private DNS**: Private DNS zones for name resolution within VNets — can define any zone name (even `microsoft.com`, but don't), not accessible from internet
+- **Azure Public DNS**: Host public DNS zones for your domain — accessible from internet
+- **Azure AD Domain Services**: Managed Active Directory domain services (LDAP, Kerberos, NTLM) without deploying domain controllers
 
 ## 📦 Azure Containers
 
