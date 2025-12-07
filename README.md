@@ -104,9 +104,50 @@ Four major categories:
 
 ### Network Security Groups (NSGs)
 
-- Firewall rules at subnet or NIC level
+- Act as firewalls for Azure resources — can be attached to **Network Interfaces (NIC)** or **Subnets**
 - Define **Inbound rules** (traffic coming in) and **Outbound rules** (traffic going out)
 - Rules specify: Priority, Source/Destination (IP, Service Tag, ASG), Port, Protocol, Action (Allow/Deny)
+- **Priority**: Lower number = higher priority (evaluated first, range 100-4096)
+- **Service Tags**: Predefined groups like `Internet`, `VirtualNetwork`, `AzureLoadBalancer` — use in Source/Destination instead of IPs
+- **Best practice**: Minimize number of NSGs to reduce complexity
+
+#### Default Inbound Rules
+
+| Priority | Name                     | Port | Protocol | Source            | Destination    | Action |
+| -------- | ------------------------ | ---- | -------- | ----------------- | -------------- | ------ |
+| 65000    | AllowVnetInBound         | Any  | Any      | VirtualNetwork    | VirtualNetwork | Allow  |
+| 65001    | AllowAzureLoadBalancerIn | Any  | Any      | AzureLoadBalancer | Any            | Allow  |
+| 65500    | DenyAllInBound           | Any  | Any      | Any               | Any            | Deny   |
+
+- By default, **all inbound traffic is denied** except from VNet resources and Azure Load Balancers
+
+#### Default Outbound Rules
+
+| Priority | Name                  | Port | Protocol | Source         | Destination    | Action |
+| -------- | --------------------- | ---- | -------- | -------------- | -------------- | ------ |
+| 65000    | AllowVnetOutBound     | Any  | Any      | VirtualNetwork | VirtualNetwork | Allow  |
+| 65001    | AllowInternetOutBound | Any  | Any      | Any            | Internet       | Allow  |
+| 65500    | DenyAllOutBound       | Any  | Any      | Any            | Any            | Deny   |
+
+- By default, outbound traffic to VNet and Internet is allowed — add rules to restrict (e.g., block port 80 to `Internet` to deny non-HTTPS)
+
+#### Effective Security Rules
+
+- NSGs are **cumulative** — if NSG attached to both NIC and subnet, both apply
+- Traffic must pass through **both** NSGs — a deny at either level blocks the traffic
+- **Example**: Subnet NSG allows port 22, but NIC NSG denies port 22 → SSH is **blocked** (deny wins)
+- **View both NSGs**: VM → **Networking → Network settings** — shows NIC NSG and subnet NSG
+- **View effective rules**: NIC → **Help → Effective security rules** — shows combined rules from all NSGs affecting that NIC
+
+#### Application Security Groups (ASGs)
+
+- **ASG** = logical grouping of VMs/NICs — acts as an abstraction layer for NSG rules
+- Instead of specifying individual private IPs in NSG rules, use an ASG as source/destination
+- **Example**: Allow SSH only to specific VMs → create an ASG, add those VMs' NICs, set ASG as destination in NSG rule
+- **Create ASG**: Search "Application Security Groups" → Create (name, region)
+- **Add NICs to ASG**:
+  - ASG → **Overview → Add** → select NICs, or
+  - VM → **Networking → Network settings** → configure ASG on NIC
 
 ### VNet Peering
 
@@ -164,6 +205,61 @@ Four major categories:
 - **Azure Private DNS**: Private DNS zones for name resolution within VNets — can define any zone name (even `microsoft.com`, but don't), not accessible from internet
 - **Azure Public DNS**: Host public DNS zones for your domain — accessible from internet
 - **Azure AD Domain Services**: Managed Active Directory domain services (LDAP, Kerberos, NTLM) without deploying domain controllers
+
+#### Azure Private DNS
+
+- **Use cases**: Inter-service communication, dev/test environments, internal APIs, microservices (e.g., `api.internal`, `db.dev.local`)
+- **Create**: Search "Private DNS zones" → Create → Enter zone name (e.g., `mycompany.internal`, `dev.local`)
+- **Link to VNet**: DNS zone → **DNS Management → Virtual network links** → **+ Add**
+  - Select VNet to link
+  - **Enable auto registration**: Automatically creates DNS records for new VMs in that VNet
+- **Manage records**: DNS zone → **DNS Management → Recordsets**
+  - View all records (including auto-registered)
+  - Add records manually: A, AAAA, CNAME, MX, TXT, etc. — same as public DNS
+  - Records only accessible within linked VNets
+
+#### Azure Public DNS (DNS Zone)
+
+- Similar to Private DNS, but for public internet resolution
+- **Create**: Search "DNS zones" → Create → Enter your domain name
+- **After creation**: Copy the Azure name servers (NS records) → Add them to your domain registrar
+- **Manage records**: DNS zone → **DNS Management → Recordsets**
+  - Add A, AAAA, CNAME, MX, TXT records, etc.
+  - **Important**: IP addresses must be **public IPs** (not private)
+
+## ⚖️ Azure Load Balancers
+
+| Service             | Layer   | Use Case                                              |
+| ------------------- | ------- | ----------------------------------------------------- |
+| Azure Load Balancer | Layer 4 | TCP/UDP traffic, internal or public load balancing    |
+| Application Gateway | Layer 7 | HTTP/HTTPS, WAF, SSL termination, URL-based routing   |
+| Azure Front Door    | Layer 7 | Global apps, CDN, WAF, SSL offloading, edge locations |
+| Traffic Manager     | DNS     | DNS-based traffic direction, geographic routing       |
+
+- **Azure Front Door**: Recommended for web-facing apps (CDN + load balancing + WAF), unless cost is primary concern
+
+### Azure Load Balancer
+
+- Layer 4 (Transport layer) load balancer for TCP/UDP traffic
+- Distributes traffic across VMs in a backend pool
+
+#### SKUs
+
+| SKU      | Description                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------- |
+| Basic    | **Deprecated** — not recommended, won't be correct answer on exam                                       |
+| Standard | Recommended — SLA, NAT Gateway, Private Link, Availability Zone support, up to 10,000 backend instances |
+| Gateway  | For third-party network virtual appliances (not covered in AZ-104)                                      |
+
+#### Availability Options
+
+- **Zonal**: Load balancer in a single availability zone
+- **Zone-redundant**: Microsoft distributes across multiple zones automatically
+- **Tip**: When availability is the main priority, choose **zone-redundant** (multi-zone)
+
+#### Availability SLA Comparison
+
+- Single VM < 2+ VMs in Availability Set < VMs across Availability Zones (highest SLA)
 
 ## 📦 Azure Containers
 
@@ -363,8 +459,10 @@ Azure offers multiple ways to run containers:
 
 **Custom Domains** (Settings → Custom domains):
 
-- **Add custom domain**: Use your own already registered domain
-- **Buy App Service domain**: Purchase a domain directly through Azure
+- **Methods to add custom domain**:
+  1. **Via Azure DNS Zone**: DNS zone → Recordsets → Add CNAME pointing to `<app-name>.azurewebsites.net`
+  2. **Via App Service** (other registrars): Add custom domain → Domain provider: "All other domain services" → Follow suggested approach (A record + TXT, or CNAME)
+  3. **Via App Service Domain**: Add custom domain → Domain provider: "App Service Domain" (requires purchasing domain first via **Buy App Service domain** on Custom domains page)
 - **SSL/TLS binding**: After adding domain, click **Add Binding** → Select certificate → Choose TLS/SSL type:
   - **SNI SSL**: Multiple SSL sites share same IP (modern browsers, most common)
   - **IP-based SSL**: Dedicated IP per SSL certificate (legacy clients, higher cost)
@@ -482,6 +580,7 @@ Azure offers multiple ways to run containers:
 - **SSH (Linux)**: Port 22, use `ssh -i <key-path> <user>@<public-ip>` or password auth
 - **Serial Console**: Text-based access for troubleshooting unresponsive VMs (requires boot diagnostics)
 - **Reset access**: VM → **Help** → **Reset password** (if locked out)
+- **Troubleshoot connections**: VM → **Help** → **Connection troubleshoot** — test connectivity to another VM, IP, or URL
 
 ### 🏰 Azure Bastion
 
