@@ -242,6 +242,7 @@ Four major categories:
 
 - Layer 4 (Transport layer) load balancer for TCP/UDP traffic
 - Distributes traffic across VMs in a backend pool
+- **Region**: Keep load balancer in the same region or close to VMs for best performance
 
 #### SKUs
 
@@ -250,6 +251,8 @@ Four major categories:
 | Basic    | **Deprecated** — not recommended, won't be correct answer on exam                                       |
 | Standard | Recommended — SLA, NAT Gateway, Private Link, Availability Zone support, up to 10,000 backend instances |
 | Gateway  | For third-party network virtual appliances (not covered in AZ-104)                                      |
+
+- **Standard SKU backend types**: IP-based (on-prem, AWS, GCP servers) or NIC-based (Azure VMs, VMSS)
 
 #### Availability Options
 
@@ -260,6 +263,49 @@ Four major categories:
 #### Availability SLA Comparison
 
 - Single VM < 2+ VMs in Availability Set < VMs across Availability Zones (highest SLA)
+
+#### Load Balancer Components
+
+Three main components:
+
+1. **Frontend IP configuration**: The public or private IP that receives traffic
+2. **Backend pools**: Groups of VMs/servers that handle the traffic
+3. **Rules**: Define how to route traffic from frontend to backend
+
+#### Creating a Load Balancer
+
+**Basics Tab:**
+
+- **SKU**: Standard (recommended) or Gateway
+- **Type**: Public (has public IP) or Internal (private IP only)
+- **Tier**: Regional or Global (runs globally despite having a home region)
+
+**Frontend IP configuration Tab:**
+
+- Click **Add a frontend IP configuration** to define the public IP (for public type)
+
+**Backend pools / Inbound rules / Outbound rules Tabs:**
+
+- Can configure during creation or after — create the load balancer first and configure later
+
+#### Post-Creation Configuration
+
+- **Settings → Frontend IP configuration**: Manage frontend IPs
+- **Settings → Backend pools**: Add/manage backend server groups
+- **Settings → Load balancing rules**: Configure routing rules
+
+**Adding Load Balancing Rules:**
+
+- **Session persistence**: Keep client sessions on the same backend server
+- **Outbound SNAT (Source NAT)**:
+  - **Use outbound rules**: Provide backend pool members access to internet via explicit outbound rules
+  - **Use default port allocation**: Provide backend pool members with default SNAT ports
+
+#### Multiple Backend Pools
+
+- Can have multiple backend pools with different server groups
+- Use different rules to route traffic to different backends
+- **Example**: Route `/api/*` to API servers pool, `/web/*` to web servers pool
 
 ## 📦 Azure Containers
 
@@ -972,7 +1018,11 @@ Most settings similar to regular VM creation.
   - **Parameters file**: Define parameter values separately (reuse templates with different configs)
 - **Get templates**: In **Review + Create** → **Download a template for automation**
 - **View past deployments**: Resource group → **Settings** → **Deployments**
-- **Official sample templates**: https://github.com/Azure/azure-quickstart-templates
+
+> **Exam Tip**: Expect a couple of ARM template questions. Review quickstart templates to understand parameters, resources, variables, and outputs structure.
+
+- **Official quickstart templates**: https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts
+  - Browse templates → Click **Deploy to Azure** → Redirects to Azure Portal to deploy using that ARM template
 
 **Sample ARM Template (template.json):**
 
