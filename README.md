@@ -323,6 +323,50 @@ Check the following areas when troubleshooting:
 - **Monitoring → Alerts**: Set up alerts to notify when health probes detect issues
 - Use to get notified when backend servers become unhealthy
 
+### Application Gateway
+
+- Layer 7 (Application layer) load balancer for HTTP/HTTPS traffic
+- Routes based on **URL path**, **headers**, **host**, and other HTTP attributes
+- Supports WAF, SSL termination, and URL-based routing
+
+#### Creating an Application Gateway
+
+**Basics Tab:**
+
+- **Enable autoscaling**: Scale instances based on traffic (set min/max instance count)
+- **HTTP2**: Enabled at frontend, converts to HTTP/1.1 when routing to backend
+- **VNet and Subnet**: Select VNet and a **dedicated subnet** (no other resources allowed in Application Gateway subnet)
+
+**Frontends Tab / Backends Tab / Configuration Tab:**
+
+- Similar to Azure Load Balancer (frontend IPs, backend pools, routing rules)
+
+## 🔍 Network Watcher
+
+- Azure automatically creates one Network Watcher **per subscription per region** you use
+- Search "Network Watcher" to see all network watchers (don't go into individual ones — nothing specific there)
+
+### Key Tools
+
+- **Connection troubleshoot**: Troubleshoot connectivity between services (VMs) and external destinations
+- **Connection monitor**: Track connectivity over time (latency, packet loss), alert on unstable or unreachable connections
+
+### Connection Monitor
+
+Track connectivity between sources and destinations with configurable test settings.
+
+**Creating a Connection Monitor:**
+
+1. **Add Test Group**:
+
+   - **Sources**: VMs, VMSS, Azure Arc endpoints
+   - **Destinations**: VMs, VMSS, external addresses (e.g., `google.com`)
+   - **Test configuration**: Protocol, port (e.g., 443 for HTTPS), test frequency, path, success thresholds
+   - **Disable test group**: Option to create the test group in disabled state
+
+2. **Create Alert Tab**:
+   - Define alerts for connection failures or threshold breaches
+
 ## 📦 Azure Containers
 
 Azure offers multiple ways to run containers:
