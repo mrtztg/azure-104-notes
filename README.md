@@ -293,6 +293,7 @@ Three main components:
 - **Settings → Frontend IP configuration**: Manage frontend IPs
 - **Settings → Backend pools**: Add/manage backend server groups
 - **Settings → Load balancing rules**: Configure routing rules
+- **Settings → Health probes**: Configure health checks for backend servers
 
 **Adding Load Balancing Rules:**
 
@@ -306,6 +307,21 @@ Three main components:
 - Can have multiple backend pools with different server groups
 - Use different rules to route traffic to different backends
 - **Example**: Route `/api/*` to API servers pool, `/web/*` to web servers pool
+
+#### Troubleshooting Load Balancer
+
+Check the following areas when troubleshooting:
+
+1. **Frontend IP configuration**: Verify public IP is correct, DNS name resolves properly
+2. **Backend pools**: Check VM status (running), verify VMs are in correct pool, check health status
+3. **Health probes**: Verify protocol (HTTP/HTTPS/TCP), port, path (e.g., `/health`), interval, and threshold settings
+4. **Load balancing rules**: Verify frontend IP selected, frontend/backend ports match app, correct backend pool assigned, session persistence and idle timeout configured correctly
+5. **Outbound rules**: Check when backend VMs can't reach the internet (SNAT port exhaustion, missing outbound rule)
+
+#### Health Probe Alerts
+
+- **Monitoring → Alerts**: Set up alerts to notify when health probes detect issues
+- Use to get notified when backend servers become unhealthy
 
 ## 📦 Azure Containers
 
