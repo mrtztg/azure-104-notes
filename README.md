@@ -1,5 +1,7 @@
 # ☁️ azure-104-notes
 
+> 🧪 **Free AZ-104 Labs**: [Microsoft Learning AZ-104 Labs](https://microsoftlearning.github.io/AZ-104-MicrosoftAzureAdministrator/)
+
 ## 🏗️ Azure Concepts
 
 > **Note**: Not everything in this section will appear on the AZ-104 exam. This is an overview of Azure services.
@@ -398,7 +400,9 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - Can also access via each resource's menu → **Diagnostic settings**
 - **Note**: Some resources (VMs, Web Apps) won't appear in Monitor's list — configure from the resource itself
 
-### VM Diagnostics
+### Collecting Metrics & Logs
+
+#### VM Diagnostics
 
 **Default Metrics (always collected):**
 
@@ -416,7 +420,7 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - **Option 1**: VM → Monitoring → **Insights** → Configure
 - **Option 2**: Monitor → Insights → **Virtual Machines** → Enable for the VM
 
-### App Service (Web App) Diagnostics
+#### App Service (Web App) Diagnostics
 
 - Basic metrics collected by default (requests, response time, errors)
 - For additional logs:
@@ -426,6 +430,24 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 3. Enable Application Insights: Web App → Monitoring → **Application Insights** → Turn on
 
 ⚠️ **Note**: Enabling some diagnostics may **reboot the resource**
+
+### Viewing Metrics & Logs
+
+#### Metrics
+
+- Found in Monitor → **Metrics** (left menu)
+- Select a **scope** (e.g., a VM) and apply
+- View insights like CPU percentage, memory usage, etc.
+
+#### Logs
+
+- Found in Monitor → **Logs** (left menu)
+- Scope can be as broad as an **entire subscription**
+- **Note**: Logs have more delay than Metrics (can be over an hour)
+- Uses **Kusto Query Language (KQL)** — similar to SQL
+- **Pre-built queries**: Available in the queries hub for each resource type
+  - Examples: "Get replication health status history", "Virtual Machine available memory"
+  - Use them directly or learn KQL from their syntax
 
 ## 📦 Azure Containers
 
