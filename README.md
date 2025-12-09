@@ -367,6 +367,66 @@ Track connectivity between sources and destinations with configurable test setti
 2. **Create Alert Tab**:
    - Define alerts for connection failures or threshold breaches
 
+### Diagnostic Logs
+
+- Most Azure resources have a diagnostics system that collects metrics and data
+- **Disabled by default** for resources like NSGs, NICs
+- For NIC, NSG, Public IP: Enable via Network Watcher → Logs → Diagnostic Logs, or via Monitor, or in each resource
+- See [Azure Monitor](#-azure-monitor) section for full diagnostics workflow
+
+## 📊 Azure Monitor
+
+Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azure resources.
+
+- Can monitor **external servers** (on-prem, other clouds) by installing the appropriate agent
+- Search "Monitor" in Azure Portal
+
+### Insights Menu
+
+| Insight              | Description                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Applications**     | For App Service web apps (Application Insights)                                                       |
+| **Virtual Machines** | Requires agent installation to extract and send metrics                                               |
+| **Storage Accounts** | Transaction timeline, E2E latency, server latency                                                     |
+| **Containers**       | For Kubernetes containers                                                                             |
+| **Networks**         | Traffic overview, connectivity checks, **Topology** (map of connections between servers and networks) |
+| **Azure Cosmos DB**  | Access and visualize Azure SQL/Cosmos data                                                            |
+
+### Diagnostic Settings
+
+- Found in **Monitor → Settings → Diagnostic settings**
+- Can also access via each resource's menu → **Diagnostic settings**
+- **Note**: Some resources (VMs, Web Apps) won't appear in Monitor's list — configure from the resource itself
+
+### VM Diagnostics
+
+**Default Metrics (always collected):**
+
+- Basic host-level: CPU utilisation, disk and network usage
+
+**Guest-Level Monitoring (additional):**
+
+1. Go to VM → **Monitoring → Diagnostic Settings**
+2. Enable guest-level monitoring
+3. Requires a **storage account** for storing guest-level logs
+4. Configure log levels, performance counters, etc.
+
+**Sending to Monitor Insights:**
+
+- **Option 1**: VM → Monitoring → **Insights** → Configure
+- **Option 2**: Monitor → Insights → **Virtual Machines** → Enable for the VM
+
+### App Service (Web App) Diagnostics
+
+- Basic metrics collected by default (requests, response time, errors)
+- For additional logs:
+
+1. Go to Web App → **Diagnostic settings** → Add diagnostic setting
+2. Check desired logs
+3. Enable Application Insights: Web App → Monitoring → **Application Insights** → Turn on
+
+⚠️ **Note**: Enabling some diagnostics may **reboot the resource**
+
 ## 📦 Azure Containers
 
 Azure offers multiple ways to run containers:
