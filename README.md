@@ -449,6 +449,114 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
   - Examples: "Get replication health status history", "Virtual Machine available memory"
   - Use them directly or learn KQL from their syntax
 
+## 🔄 Backup & Recovery
+
+### Backup
+
+#### Creating a Backup Vault
+
+- Enable backup from:
+  - Resource itself (e.g., VM) → **Backup + Disaster Recovery → Backup**
+  - Search "**Backup and Site Recovery**" in Azure Portal
+- **Region**: Set to same region as the resource (saves transfer costs)
+- **Immutability**: Can enable at creation, disable or make irreversible later
+- Created vault found under "**Recovery Services Vault**"
+
+#### Configuring Backups
+
+1. Go to Backup Vault → **Getting Started → Backup**
+2. Choose workload (Azure VM, on-premise, etc.)
+3. Select resource(s) to backup
+4. Configure **Backup Policy**:
+   - Frequency (daily, weekly)
+   - Retention period
+   - Instance restore snapshot retention
+
+**Supported On-Premise Workloads:**
+
+- Files and Folders (any Windows server, including AWS EC2)
+- Hyper-V Virtual Machines
+- VMware Virtual Machines
+- Microsoft SQL Server, SharePoint, Exchange
+- System State, Bare Metal Recovery
+
+#### Managing Backups
+
+- **View backups**: Vault → Protected Items → **Backup Items**
+- **Backup now**: Click `...` (3 dots) at end of row → Backup now
+- **View details**: See available restore points
+
+#### Restoring
+
+**Restore VM:**
+
+1. Click **Restore VM** → Choose restore point
+2. Options:
+   - **New VM**: Can restore to different subscription (useful for copying VMs)
+   - **Existing VM**: Replace current VM
+
+**File Recovery:**
+
+1. Click **File Recovery**
+2. Download executable file (can add password protection)
+3. Executable mounts a drive to your machine
+4. Copy desired files
+5. **Expires after 12 hours**
+
+#### Monitoring & Diagnostics
+
+- **Backup Jobs**: Vault → Monitoring → **Backup Jobs** (see ongoing backups)
+- **Diagnostic Settings**: Vault → Monitoring → Diagnostic settings → Add
+  - ⚠️ Create **separate** diagnostic settings for Backup and Site Recovery (data loss prevention)
+- **Backup Reports**: Vault → Manage → **Backup reports**
+  - Data shows up after backup jobs occur
+  - Data is **up to yesterday** (no same-day data)
+
+#### Soft Delete
+
+- Deleted backups are **soft deleted** for **14 days**
+- Can undelete within that window
+- After 14 days, Azure permanently deletes automatically
+
+### Site Recovery (ASR)
+
+Azure Site Recovery (ASR) replicates workloads to a secondary region for disaster recovery.
+
+#### Creating Site Recovery
+
+- Go to VM → **Backup + Disaster Recovery → Disaster recovery**
+
+**Basics Tab:**
+
+- **Disaster recovery between availability zones?**: Only available if VM has zone availability enabled
+- **Target region**: Choose closest region to the main resource
+
+**Advanced Settings Tab:**
+
+- VM resource group and VNet will be **new by default**
+- **Availability options**: Single Instance, Availability Set, Availability Zone, VMSS
+- Configure: Proximity placement, capacity reservation, storage settings, replication settings
+
+#### Managing Replicated Items
+
+- After creation, find vault in "**Recovery Services Vaults**"
+- **Monitor progress**: Vault → Monitoring → **Site Recovery jobs**
+- **View replicated items**: Vault → Protected Items → **Replicated Items**
+
+#### Failover Options
+
+| Action | Description |
+|--------|-------------|
+| **Failover** | Permanent failover — replication becomes standalone, no longer depends on source |
+| **Test Failover** | Test that replication works without affecting production |
+
+**Test Failover Workflow:**
+
+1. Click **Test Failover** on the replicated item
+2. Verify ASR VM is deployed in target region
+3. Confirm everything works correctly
+4. Return to replicated item → Click **Cleanup test failover**
+
 ## 📦 Azure Containers
 
 Azure offers multiple ways to run containers:
