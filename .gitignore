@@ -126,3 +126,5 @@ http-client.private.env.json
 .cursorignore
 .cursorindexingignore
 .cursorrules
+
+.claudemd
