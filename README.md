@@ -43,7 +43,7 @@ Four major categories:
 
 - **Virtual Network (VNet)**: Isolated network environment in Azure
 - **Virtual WAN**: Unified hub-and-spoke network connectivity
-- **ExpressRoute**: Private, dedicated connection between on-premises and Azure
+- **ExpressRoute**: Private, dedicated connection between on-premises and Azure — operates over a private network, not the Internet
 - **VPN Gateway**: Connects on-premises networks to Azure VNets (Site-to-Site or Point-to-Site)
 - **Azure DNS**: DNS domain hosting and name resolution
 - **Peering**: Connect VNets together
@@ -176,6 +176,10 @@ Four major categories:
   - **Allow gateway transit**: Share VPN/ExpressRoute gateway with peered VNet
 - **After saving**: Azure creates a peering connection in **both** VNets (if both directions enabled)
 - **Note**: NSG rules may still block traffic even after peering is established
+
+### Route Tables (User-Defined Routes)
+
+- **To route traffic via intrusion-based device**: Set up a route table and add it to the subnets in the other virtual networks
 
 ### VNet Gateway (VNet-to-VNet Connection)
 
@@ -820,6 +824,11 @@ Azure offers multiple ways to run containers:
     - Choose Key Vault and Key (if no Key selected, new one created automatically)
     - Key Vault only needs **Azure Disk Encryption for volume encryption** checkbox enabled
     - VM restart required to apply encryption
+- **Azure Disk Encryption (ADE)**:
+  - **Windows VMs**: Uses BitLocker for VM-controlled disks
+  - **Linux VMs**: Uses dm-crypt for VM-controlled disks
+  - **Backup**: ADE encrypted VMs can be backed up to Recovery Services Vault
+  - **Integration**: ADE is integrated with Azure Key Vault
 - **Enable Ultra Disk compatibility**: Allows attaching Ultra Disks for highest performance
 - **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
 
@@ -898,6 +907,10 @@ Azure offers multiple ways to run containers:
 - **After attaching**: Must initialize and format disk inside VM (Windows: Disk Management, Linux: `fdisk`/`mkfs`)
 - **Max disks**: Limited by VM size (check VM specs for maximum data disk count)
 - **Detach**: Can detach and reattach to different VMs (same region)
+
+### 🔌 Attaching Network Interfaces
+
+- **Requirement**: VM must be stopped (deallocated) before attaching a Network Interface
 
 ### 📈 Virtual Machine Scale Sets (VMSS)
 
