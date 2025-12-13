@@ -1266,6 +1266,7 @@ Most settings similar to regular VM creation.
   - **Storage Blob Data Contributor**: Read, write, and delete blob data
   - **Storage Blob Data Reader**: Read-only access to blob data
   - Similar roles exist for Queues, Tables, and Files (e.g., Storage Queue Data Contributor)
+- **Storage account key management**: Storage Account Encryption Scope Contributor role does NOT grant permissions to list or regenerate storage account keys — requires Storage Account Key Operator Service Role or Storage Account Contributor role (Storage Account Contributor includes listing and regenerating storage account keys)
 - **Role descriptions**: Check role descriptions in **IAM** → **Roles** tab to understand access levels
 
 #### Assigning Storage Roles
