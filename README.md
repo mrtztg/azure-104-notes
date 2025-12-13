@@ -989,6 +989,12 @@ Most settings similar to regular VM creation.
     - **"Geo priority replication guarantees Blob storage data is geo-replicated within 15 minutes"**
   - **GZRS (Geo-Zone-Redundant Storage)**: Safest option, combines ZRS and GRS
 
+#### Storage Account Types and Archive Tier Support
+
+- **General Purpose V2**: Supports all Azure Storage tiers (Hot, Cool, Archive) — can store objects in Archive tier
+- **General Purpose V1**: Does NOT support Archive tier — designed for general-purpose storage only
+- **Blob Storage accounts**: Blob Storage is a storage service inside the account, not a storage account type itself — not applicable for Archive tier storage account selection
+
 **Advanced Tab Settings:**
 
 - **Security**:
@@ -1018,6 +1024,7 @@ Most settings similar to regular VM creation.
 - **Recovery** (prevent accidental or malicious data loss):
   - **Enable point-in-time restore for containers**: Restore blob data to earlier state within retention period (requires versioning, change feed, and blob soft delete enabled)
   - **Enable soft delete for blobs**: Retain deleted blobs for specified days (can recover within retention period)
+    - **Purpose**: Protects against accidental deletion — keeps deleted files for 14 days (default) before permanent deletion
   - **Enable soft delete for containers**: Retain deleted containers for specified days
   - **Enable soft delete for file shares**: Retain deleted file shares for specified days
 - **Tracking**:
@@ -1570,6 +1577,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
     - **Invite user**: For users whose email is not within your organization (e.g., contractors using personal accounts or external email addresses)
       - Useful when the user's email is not `@yourcompany.onmicrosoft.com` or `@yourcompany.com`
       - Most other options are similar to "Create user" (force MFA, using location, roles, groups, etc.)
+      - Creates a **guest user account** — appropriate for external organizations (create a guest user account for each member of the external team)
   - New users have no permissions by default, only the ability to login to the Azure portal
 - **Bulk Operations**: Available in multiple areas to perform bulk actions:
   - **Users menu**: Bulk create (download CSV template, fill with user data, and upload), bulk delete, bulk invite, download users
@@ -1680,12 +1688,14 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 ### RBAC (Role-Based Access Control)
 
+- **What it does**: Helps manage who has access to Azure resources, what they can do with those resources, and what areas they have access to
 - **Benefits**:
   - **Level of abstraction**: Permissions are managed at the role level rather than individual user level
   - **Simpler management**: Fewer errors due to centralized permission management
   - **Consistent access**: All users with the same role are treated identically
   - **Easier user onboarding**: New users can be quickly added to the system by assigning appropriate roles
   - **Scalability**: Easy to manage permissions for large numbers of users
+- **Limitations**: Cannot limit creating VMs to specific SKUs (use Azure Policy instead for resource property restrictions)
 
 #### Assigning Roles
 
@@ -1735,6 +1745,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
 - Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
 - These locks help protect critical resources from accidental deletion or modification
+- **Delete lock behavior**: Delete lock prevents deletion but does NOT prevent moving resources to another resource group (moving is not a deletion operation)
 
 ### 📋 Azure Policy
 
