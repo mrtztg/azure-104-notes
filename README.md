@@ -1576,6 +1576,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Group members**: Import members, remove members, download members
   - Other areas may also have bulk operations
 - **User Groups**: Groups are an organizational structure for putting users in. If you enable **"Azure AD roles can be assigned to the group"** during group creation, you can assign roles to the group (which will apply to all users in the group). By choosing **"Dynamic User"** in Membership Type during group creation, you can create dynamic groups with rules (e.g., if display name contains something, or if department is something, etc.)
+  - **Dynamic groups**: Membership is automatically determined by rules (attributes, properties) — cannot manually add users or devices to dynamic groups
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
 
 ### Tenant
