@@ -151,6 +151,17 @@ Four major categories:
   - ASG → **Overview → Add** → select NICs, or
   - VM → **Networking → Network settings** → configure ASG on NIC
 
+### Azure Firewall
+
+- **To allow traffic to certain FQDNs**: Create Application Collection rules
+- Managed network security service with application and network-level filtering
+
+### Web Application Firewall (WAF)
+
+- Provides centralized protection of web applications from common exploits and vulnerabilities
+- Protects against SQL injection, cross-site scripting, and other common attacks
+- Available on Azure Application Gateway and Azure Front Door
+
 ### VNet Peering
 
 - By default, resources in different VNets **cannot communicate** with each other
@@ -207,6 +218,7 @@ Four major categories:
 
 ### Name Resolution
 
+- **DNS port**: DNS listens on port 53
 - **BYO DNS (Bring Your Own)**: Use your own DNS server (on-premises or VM-hosted) — domain/subdomain resolution already handled before reaching Azure
 - **Azure Private DNS**: Private DNS zones for name resolution within VNets — can define any zone name (even `microsoft.com`, but don't), not accessible from internet
 - **Azure Public DNS**: Host public DNS zones for your domain — accessible from internet
@@ -248,6 +260,7 @@ Four major categories:
 
 - Layer 4 (Transport layer) load balancer for TCP/UDP traffic
 - Distributes traffic across VMs in a backend pool
+- **Types**: Can be **Internal** (private IP only) or **Public** (has public IP)
 - **Region**: Keep load balancer in the same region or close to VMs for best performance
 
 #### SKUs
