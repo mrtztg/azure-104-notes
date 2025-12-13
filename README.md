@@ -623,6 +623,7 @@ Azure offers multiple ways to run containers:
 
 - **Restart policy**: Always, On failure, or Never
 - **Environment variables**: Pass config to container at runtime
+- **Resource limits**: If no resource limit is specified, container's maximum resource usage equals its resource request (containers only use the CPU resources they request)
 
 **Post-Creation (Settings → Containers):**
 
@@ -904,6 +905,7 @@ Azure offers multiple ways to run containers:
 - **Serial Console**: Text-based access for troubleshooting unresponsive VMs (requires boot diagnostics)
 - **Reset access**: VM → **Help** → **Reset password** (if locked out)
 - **Troubleshoot connections**: VM → **Help** → **Connection troubleshoot** — test connectivity to another VM, IP, or URL
+- **Redeploy**: VM → **Redeploy + reapply** → **Redeploy** — moves VM to a new physical host (addresses host issues; preserves OS/data disks, static IP, and configurations)
 
 ### 🏰 Azure Bastion
 
@@ -1643,6 +1645,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **User Groups**: Groups are an organizational structure for putting users in. If you enable **"Azure AD roles can be assigned to the group"** during group creation, you can assign roles to the group (which will apply to all users in the group). By choosing **"Dynamic User"** in Membership Type during group creation, you can create dynamic groups with rules (e.g., if display name contains something, or if department is something, etc.)
   - **Dynamic groups**: Membership is automatically determined by rules (attributes, properties) — cannot manually add users or devices to dynamic groups
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
+  - **Purpose**: Allow Azure resources to securely access other Azure services (like Key Vault) without needing to manage credentials
 
 ### Tenant
 
@@ -1706,6 +1709,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Some Azure features are available only in paid plans (e.g. self-service password change)
 - If you have a paid license (like P2), you can enable those paid features for specific users
 - Better to enable only for users who need them, as paid features cost per person
+- **Free tenant limitation**: In a free Microsoft Entra ID tenant, you can only assign licenses to individual users — group-based licensing requires a paid version of Microsoft Entra ID
 - To view licenses: Navigate to **Entra ID → Licenses** menu
   - **All products**: Shows all available licenses
   - **Licensed Features**: Shows features included in each license
@@ -1715,8 +1719,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 #### Password Reset (Self-Service Password Reset)
 
-- **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or lost
-- Configure who can use it (all users, selected users, or none) and required authentication methods
+- **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or - Configure who can use it and required authentication methods — SSPR can be directly assigned only to a group of users or to ALL users, but NOT to individual users
 
 #### Administrative Units
 
