@@ -458,7 +458,7 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - Enable backup from:
   - Resource itself (e.g., VM) → **Backup + Disaster Recovery → Backup**
   - Search "**Backup and Site Recovery**" in Azure Portal
-- **Region**: Set to same region as the resource (saves transfer costs)
+- **Region**: Recovery Services vault and virtual machine must be in the same region (saves transfer costs)
 - **Immutability**: Can enable at creation, disable or make irreversible later
 - Created vault found under "**Recovery Services Vault**"
 
@@ -782,6 +782,7 @@ Azure offers multiple ways to run containers:
   - **Availability zone**: Deploy VM in specific zone within region (protects against datacenter failures)
   - **Virtual machine scale set**: Auto-scaling group of identical VMs with load balancing
   - **Availability set**: Group VMs across fault domains and update domains within single datacenter (99.95% SLA)
+    - **Limitation**: Availability sets cannot protect VMs from data center-level failure — use Availability zones for data center failure protection
 - **Security type**:
   - **Standard**: Regular VM without additional security features
   - **Trusted launch**: Secure boot, vTPM (virtual Trusted Platform Module), integrity monitoring (protects against boot kits and rootkits)
@@ -1112,6 +1113,10 @@ Most settings similar to regular VM creation.
   - `azcopy remove <target>`: Delete blobs
 - **Benefits**: Fast, resumable transfers with parallelism and automatic retries
 
+#### Azure Import/Export Service
+
+- Allows data transfer into **Azure Blobs** and **Azure Files** by creating jobs
+
 #### Storage Browser
 
 - Azure Portal GUI tool for managing storage files across multiple accounts
@@ -1126,6 +1131,13 @@ Most settings similar to regular VM creation.
 - **Location**: Storage account → **Data storage** → **File shares** (also accessible via Storage browser)
 - **Snapshots**: Manual one-time copy of files, browse/restore individual files (File share → **Operations** → **Snapshots**, or Windows "Previous Versions" tab)
 - **Backup**: Scheduled/frequent backup with configurable policies and retention (File share → **Operations** → **Backup**)
+
+#### Azure File Sync (Synchronize with On-Premise Server)
+
+- **To synchronize files between Azure File Share and on-premise server**:
+  - **Create a sync group**: Essential for managing synchronization between file share and on-premise server
+  - **Register a server name**: Establishes connection between on-premise server and Azure services for file synchronization
+  - **Install Azure File Sync agent**: Enables synchronization and facilitates file transfer between file share and on-premise server
 
 #### Storage Authentication Methods
 
@@ -1236,6 +1248,7 @@ Most settings similar to regular VM creation.
   - **Azure SQL Database**: Managed relational database (PaaS), serverless and provisioned tiers
   - **Azure SQL Managed Instance**: Near 100% compatibility with SQL Server, VNet integration
   - **SQL Server on Azure VMs**: IaaS option for full SQL Server control
+  - **Backup**: Azure SQL Server has automatic daily backups — no need to set up additional Azure Backup policy
 - **NoSQL Services**:
   - **Azure Cosmos DB**: Globally distributed, multi-model NoSQL database
   - **Azure Table Storage**: NoSQL key-value store (part of Azure Storage)
