@@ -151,6 +151,17 @@ Four major categories:
   - ASG → **Overview → Add** → select NICs, or
   - VM → **Networking → Network settings** → configure ASG on NIC
 
+### Azure Firewall
+
+- **To allow traffic to certain FQDNs**: Create Application Collection rules
+- Managed network security service with application and network-level filtering
+
+### Web Application Firewall (WAF)
+
+- Provides centralized protection of web applications from common exploits and vulnerabilities
+- Protects against SQL injection, cross-site scripting, and other common attacks
+- Available on Azure Application Gateway and Azure Front Door
+
 ### VNet Peering
 
 - By default, resources in different VNets **cannot communicate** with each other
@@ -207,6 +218,7 @@ Four major categories:
 
 ### Name Resolution
 
+- **DNS port**: DNS listens on port 53
 - **BYO DNS (Bring Your Own)**: Use your own DNS server (on-premises or VM-hosted) — domain/subdomain resolution already handled before reaching Azure
 - **Azure Private DNS**: Private DNS zones for name resolution within VNets — can define any zone name (even `microsoft.com`, but don't), not accessible from internet
 - **Azure Public DNS**: Host public DNS zones for your domain — accessible from internet
@@ -219,6 +231,7 @@ Four major categories:
 - **Link to VNet**: DNS zone → **DNS Management → Virtual network links** → **+ Add**
   - Select VNet to link
   - **Enable auto registration**: Automatically creates DNS records for new VMs in that VNet
+  - **Note**: Auto registration is supported only for private DNS zones when linked to virtual networks, not public DNS zones
 - **Manage records**: DNS zone → **DNS Management → Recordsets**
   - View all records (including auto-registered)
   - Add records manually: A, AAAA, CNAME, MX, TXT, etc. — same as public DNS
@@ -248,6 +261,7 @@ Four major categories:
 
 - Layer 4 (Transport layer) load balancer for TCP/UDP traffic
 - Distributes traffic across VMs in a backend pool
+- **Types**: Can be **Internal** (private IP only) or **Public** (has public IP)
 - **Region**: Keep load balancer in the same region or close to VMs for best performance
 
 #### SKUs
@@ -354,6 +368,7 @@ Check the following areas when troubleshooting:
 
 ### Key Tools
 
+- **IP Flow Verify**: Find out if a network security rule is preventing a network packet from reaching a virtual machine hosted in an Azure virtual network
 - **Connection troubleshoot**: Troubleshoot connectivity between services (VMs) and external destinations
 - **Connection monitor**: Track connectivity over time (latency, packet loss), alert on unstable or unreachable connections
 
@@ -407,6 +422,8 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 ### Collecting Metrics & Logs
 
 #### VM Diagnostics
+
+- **Storage account requirement**: To get diagnostics from an Azure virtual machine, you need to create a storage account to store the diagnostic data
 
 **Default Metrics (always collected):**
 
@@ -1071,6 +1088,10 @@ Most settings similar to regular VM creation.
 #### Blob Containers and Management
 
 - **Containers**: Organize blobs within storage account (like folders/boxes to put blobs in)
+- **Blob types**:
+  - **Block blobs**: Designed to store large amounts of unstructured data (images, backups, thousands of image files)
+  - **Append blobs**: Used for log data where the need is to continuously append new data
+  - **Page blobs**: Typically used for storing virtual hard disks (VHDs) for Azure virtual machines
 - **Blob access tiers**: Can be set during file upload or changed later from top menu:
   - **Hot**: Frequent access
   - **Cool**: Infrequent access (30+ days)
@@ -1090,6 +1111,12 @@ Most settings similar to regular VM creation.
   - **Blob subtype**: Base blobs, Snapshots, or Versions
 - **Filter set** tab (when "Limit blobs with filters" is selected):
   - **Blob prefix**: Apply to specific blob name patterns (e.g., "logs/")
+    - **Format**: `[container name]/[blob name]` — path must begin with container name
+    - **Container-level match**: `container1/` (with trailing slash) matches all blobs in `container1`
+    - **Container name prefix**: `container1` (no trailing slash) matches all containers starting with `container1`
+    - **Sub-path match**: `container1/sub1/` matches blobs in `container1` starting with `sub1/`
+    - **Wildcards**: `*` and `?` are literal characters (not wildcards) in blob prefix matching
+    - **Case-sensitive**: Prefix matching is case-sensitive
   - **Blob index match**: Filter by blob index tags
 - **Rule actions** (can define multiple actions in sequence):
   - **Move to cool tier**: After X days since creation/last modification/last access
@@ -1103,7 +1130,10 @@ Most settings similar to regular VM creation.
 
 #### Object Replication
 
+- Feature of Azure Blob Storage that works at the container level
 - Asynchronously copies block blobs between source and destination storage accounts
+- **Supported storage account types**: General Purpose V2 (StorageV2) and Premium Block Blob Storage (BlobStorage)
+- **Configuration**: Must configure object replication policies between source and destination containers
 - **Use cases**: Disaster recovery, minimize latency, compliance
 - **Requirements**: Blob versioning must be enabled on both accounts
 - **Location**: Storage account → **Data management** → **Object replication**
@@ -1722,6 +1752,8 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Easier user onboarding**: New users can be quickly added to the system by assigning appropriate roles
   - **Scalability**: Easy to manage permissions for large numbers of users
 - **Limitations**: Cannot limit creating VMs to specific SKUs (use Azure Policy instead for resource property restrictions)
+- **Virtual Machine login permissions**: Virtual Machine Contributor role alone does not grant login permissions — the "Virtual Machine User Login" role is required to allow users to sign in to the virtual machine
+- **Virtual Machine Contributor role**: Allows managing VMs and their attached disks, but does NOT allow managing disk snapshots — for disk snapshots, use "Disk Snapshot Contributor" role
 
 #### Assigning Roles
 
