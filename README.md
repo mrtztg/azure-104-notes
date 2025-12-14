@@ -1069,6 +1069,8 @@ Most settings similar to regular VM creation.
   - **Microsoft network routing**: Traffic through Microsoft's global network (better performance, slightly higher cost)
   - **Internet routing**: Traffic through public internet (lower cost, may have higher latency)
 
+![Routing Preference](assets/routing-preference.jpg)
+
 **Data Protection Tab Settings:**
 
 - **Recovery** (prevent accidental or malicious data loss):
@@ -1812,43 +1814,6 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Can specify subscription(s), management group(s), or resource group(s)
   - Limits the scope where this role can be used
 - **Limit**: Maximum of 5000 custom roles per tenant (avoid creating excessive custom roles)
-
-**Sample Custom Role JSON:**
-
-```json
-{
-  "properties": {
-    "roleName": "Custom VM and Storage Operator",  // Display name of the role
-    "description": "Can start, restart, and view VMs, read storage blobs but cannot delete VMs or write to storage",  // Description of what the role does
-    "type": "Microsoft.Authorization/roleDefinitions",  // Resource type for role definitions
-    "assignableScopes": [  // Where this role can be assigned (subscription, management group, resource group)
-      "/subscriptions/{subscription-id}"
-    ],
-    "permissions": [  // List of permissions granted by this role
-      {
-        "actions": [  // Control plane actions the role can perform (management operations)
-          "Microsoft.Compute/virtualMachines/start/action",  // Can start VMs
-          "Microsoft.Compute/virtualMachines/restart/action",  // Can restart VMs
-          "Microsoft.Compute/virtualMachines/read",  // Can read/view VM properties
-          "Microsoft.Network/networkInterfaces/read",  // Can read network interface properties
-          "Microsoft.Network/publicIPAddresses/read",  // Can read public IP properties
-          "Microsoft.Storage/storageAccounts/read"  // Can read storage account properties
-        ],
-        "notActions": [  // Control plane actions explicitly excluded (overrides actions)
-          "Microsoft.Compute/virtualMachines/delete"  // Cannot delete VMs
-        ],
-        "dataActions": [  // Data plane actions (operations on data within resources)
-          "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read"  // Can read blob data
-        ],
-        "notDataActions": [  // Data plane actions explicitly excluded (overrides dataActions)
-          "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",  // Cannot write blob data
-          "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete"  // Cannot delete blob data
-        ]
-      }
-    ]
-  }
-}
-```
 
 #### Permission Combination
 
