@@ -201,6 +201,12 @@ Four major categories:
 - **Next hop types**: Virtual Appliance, VPN Gateway, Virtual Network, Internet, None (blackhole)
 - **Location**: Search "Route tables" in Azure Portal → Create route table → Add routes → Associate with subnets
 
+### Service Endpoint Policies
+
+- **Requirements for applying to subnet**:
+  - Subnet must have a matching service endpoint (e.g., Microsoft.Storage for storage)
+  - Subnet and service endpoint policy must be in the **same region**
+
 ### VNet Gateway (VNet-to-VNet Connection)
 
 - Alternative to peering for connecting VNets across regions — also used for Site-to-Site (S2S) and Point-to-Site (P2S) VPN
@@ -228,6 +234,7 @@ Four major categories:
 ### Name Resolution
 
 - **DNS port**: DNS listens on port 53
+- **VM DNS inheritance**: When a VM does not have a custom DNS server configured at the Network Interface level, it inherits DNS server settings from the VNet it's connected to — otherwise, it uses that custom DNS server
 - **BYO DNS (Bring Your Own)**: Use your own DNS server (on-premises or VM-hosted) — domain/subdomain resolution already handled before reaching Azure
 - **Azure Private DNS**: Private DNS zones for name resolution within VNets — can define any zone name (even `microsoft.com`, but don't), not accessible from internet
 - **Azure Public DNS**: Host public DNS zones for your domain — accessible from internet
@@ -421,6 +428,11 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 | **Containers**       | For Kubernetes containers                                                                             |
 | **Networks**         | Traffic overview, connectivity checks, **Topology** (map of connections between servers and networks) |
 | **Azure Cosmos DB**  | Access and visualize Azure SQL/Cosmos data                                                            |
+
+### IT Service Management Connector (ITSM)
+
+- Integrates Azure Monitor with IT service management tools (e.g., System Center Service Manager) — enables Azure alerts to automatically generate incidents/alerts in Service Manager
+- **Prerequisite**: Must deploy and configure the ITSM connector in Azure before mapping alerts to Service Manager actions
 
 ### Diagnostic Settings
 
@@ -1302,6 +1314,7 @@ Most settings similar to regular VM creation.
 
 - **Method 1**: Storage account → **IAM** → **Roles** tab → Select role checkbox → Click **Add role assignment** → Assign to user/group
 - **Method 2**: Storage account → **IAM** → **Add role assignment** button → Select role → Assign to user/group/service principal
+- **Role assignment conditions**: Azure supports role assignment conditions (limiting access by IP address, resource tags, or actions when assigning RBAC) only for **Blob storage and Queue Storage** — **Tables and File shares are NOT supported**
 - **Scope inheritance**: Roles assigned at storage account level apply to all containers, queues, and tables within that account
 - **Resource group level**: Assign roles at resource group level for environment-specific access (e.g., separate prod/dev resource groups)
 - **Permission combination**: Role assignments are cumulative across scopes (union of all permissions)
