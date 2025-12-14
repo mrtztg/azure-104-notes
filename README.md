@@ -197,6 +197,7 @@ Four major categories:
   - Route traffic via intrusion-based device (NVA/firewall) — set up route table and add it to subnets in virtual networks
   - Forced tunneling (route all internet-bound traffic through on-premises network)
   - Direct traffic to specific next hop (Virtual Appliance, VPN Gateway, Virtual Network)
+  - **Service chaining**: Route traffic from on-premises through VPN gateway to another VNet using UDRs (leverages existing peering, minimizes costs vs Azure Firewall/ExpressRoute)
 - **Route priority**: Lower priority number = higher precedence (evaluated first)
 - **Next hop types**: Virtual Appliance, VPN Gateway, Virtual Network, Internet, None (blackhole)
 - **Location**: Search "Route tables" in Azure Portal → Create route table → Add routes → Associate with subnets
@@ -222,6 +223,7 @@ Four major categories:
    - Search "Virtual network gateway" → Create
    - Select the VNet and its `GatewaySubnet`
    - SKU affects cost and performance
+   - **Public IP**: Virtual Network Gateways use their own public IPs but are NOT directly associated with manually created public IPs
 3. **Create Connection** (in both gateways):
    - Gateway → **Settings → Connections** → **+ Add**
    - Connection type: VNet-to-VNet
@@ -611,7 +613,14 @@ Azure offers multiple ways to run containers:
 ### Azure Container Registry (ACR)
 
 - Private registry for storing container images (Docker, Helm charts, OCI artifacts)
-- **Tiers**: Basic (limited), Standard (production), Premium (geo-replication, private endpoints, CMK)
+
+| Feature            | Basic | Standard | Premium |
+| ------------------ | ----- | -------- | ------- |
+| Tasks              | ✅    | ✅       | ✅      |
+| Private Endpoints  | ❌    | ❌       | ✅      |
+| Geo-replication    | ❌    | ❌       | ✅      |
+| CMK                | ❌    | ❌       | ✅      |
+| Description        | Limited features | Production use | Full feature set |
 
 **Publishing Images to ACR:**
 
@@ -827,6 +836,7 @@ Azure offers multiple ways to run containers:
   - **Virtual machine scale set**: Auto-scaling group of identical VMs with load balancing
   - **Availability set**: Group VMs across fault domains and update domains within single datacenter (99.95% SLA)
     - **Limitation**: Availability sets cannot protect VMs from data center-level failure — use Availability zones for data center failure protection
+    - **Resizing when size unavailable**: If VM size is unavailable, first **deallocate the VM** (releases hardware allocation) then attempt to resize
 - **Security type**:
   - **Standard**: Regular VM without additional security features
   - **Trusted launch**: Secure boot, vTPM (virtual Trusted Platform Module), integrity monitoring (protects against boot kits and rootkits)
@@ -1074,7 +1084,7 @@ Most settings similar to regular VM creation.
 - **Network access**:
   - **Enable**: Public access enabled (access key still required)
     - **Enable for all networks**: Accessible from internet
-    - **Enable for selected virtual networks and IP addresses**: Restrict to specific VNets and IP ranges (use case: corporate network or specific Azure resources)
+    - **Enable for selected virtual networks and IP addresses**: Restrict to specific VNets and IP ranges (e.g., home office public IP address) — minimizes administrative effort compared to private endpoints
   - **Disable**: No public access, requires private endpoints
   - **Secured by Perimeter** (Most restricted): Strictest security, only accessible through configured security perimeter
 - **Routing preference**:
@@ -1241,6 +1251,7 @@ Most settings similar to regular VM creation.
   - Applications use key1 → Regenerate key2 → Switch apps to key2 → Regenerate key1
 - **Location**: Storage account → **Security + Networking** → **Access Keys**
 - **Security**: Access keys are like root passwords - store securely (Azure Key Vault), rotate regularly
+- **Automatic key rotation**: Store keys in Azure Key Vault and enable key rotation policies for automatic rotation
 
 #### Shared Access Signature (SAS)
 
@@ -1303,7 +1314,7 @@ Most settings similar to regular VM creation.
   - **Contributor**: Manage resources but cannot assign roles
   - **Reader**: Read-only access to resource properties
 - **Data access roles** (Storage-specific):
-  - **Storage Blob Data Owner**: Full access to blob containers and data (read, write, delete, manage)
+  - **Storage Blob Data Owner**: Full control over blob data (read, write, delete, manage), including setting access policies and modifying blob content — supports conditions for access
   - **Storage Blob Data Contributor**: Read, write, and delete blob data
   - **Storage Blob Data Reader**: Read-only access to blob data
   - Similar roles exist for Queues, Tables, and Files (e.g., Storage Queue Data Contributor)
@@ -1678,12 +1689,14 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
       - Most other options are similar to "Create user" (force MFA, using location, roles, groups, etc.)
       - Creates a **guest user <!--  -->account** — appropriate for external organizations (create a guest user account for each member of the external team)
   - New users have no permissions by default, only the ability to login to the Azure portal
+- **Collaboration restrictions**: Restrict who can be invited as a guest by configuring allowed domains — invitations can only be sent to users from specified domains
 - **Bulk Operations**: Available in multiple areas to perform bulk actions:
   - **Users menu**: Bulk create (download CSV template, fill with user data, and upload), bulk delete, bulk invite, download users
   - **Group members**: Import members, remove members, download members
   - Other areas may also have bulk operations
 - **User Groups**: Groups are an organizational structure for putting users in. If you enable **"Azure AD roles can be assigned to the group"** during group creation, you can assign roles to the group (which will apply to all users in the group). By choosing **"Dynamic User"** in Membership Type during group creation, you can create dynamic groups with rules (e.g., if display name contains something, or if department is something, etc.)
   - **Dynamic groups**: Membership is automatically determined by rules (attributes, properties) — cannot manually add users or devices to dynamic groups
+  - **Dynamic membership rules**: Allow users to be automatically added to groups based on specific attributes (e.g., department) — minimizes administrative effort
 - **App - Managed Identity**: Represents a program or service, used for authentication without storing credentials
   - **Purpose**: Allow Azure resources to securely access other Azure services (like Key Vault) without needing to manage credentials
 
