@@ -190,7 +190,16 @@ Four major categories:
 
 ### Route Tables (User-Defined Routes)
 
-- **To route traffic via intrusion-based device**: Set up a route table and add it to the subnets in the other virtual networks
+- **What it is**: Custom routing rules that override Azure's default system routes
+- **System routes**: Azure automatically creates default routes (e.g., VNet-to-VNet, Internet, etc.)
+- **User-defined routes**: Custom routes you create to control traffic flow
+- **Use cases**:
+  - Route traffic via intrusion-based device (NVA/firewall) — set up route table and add it to subnets in virtual networks
+  - Forced tunneling (route all internet-bound traffic through on-premises network)
+  - Direct traffic to specific next hop (Virtual Appliance, VPN Gateway, Virtual Network)
+- **Route priority**: Lower priority number = higher precedence (evaluated first)
+- **Next hop types**: Virtual Appliance, VPN Gateway, Virtual Network, Internet, None (blackhole)
+- **Location**: Search "Route tables" in Azure Portal → Create route table → Add routes → Associate with subnets
 
 ### VNet Gateway (VNet-to-VNet Connection)
 
@@ -645,6 +654,7 @@ Azure offers multiple ways to run containers:
 
 - Serverless container platform built on Kubernetes — less management than AKS, but less flexibility
 - **Use cases**: Microservices, APIs, event-driven apps with auto-scaling
+- **OS support**: Only supports **Linux-based containers** (Windows containers not supported)
 
 #### Create Container App
 
@@ -830,6 +840,7 @@ Azure offers multiple ways to run containers:
   - **Prerequisites for CMK** (create in this order):
     1. **Key Vault**: Create with purge protection enabled (**Settings** → **Properties** → **Enable purge protection**)
        - Set **Days to retain deleted vaults** as needed
+       - **Region considerations**: Recommended same region for performance, but apps can access Key Vaults in different regions or resource groups
        - **Access configuration**: Enable checkboxes to allow services to access keys:
          - **Azure VMs for deployment**: VMs can retrieve certificates/keys
          - **Azure Resource Manager for template deployment**: ARM can access keys during deployments
@@ -847,6 +858,11 @@ Azure offers multiple ways to run containers:
   - **Linux VMs**: Uses dm-crypt for VM-controlled disks
   - **Backup**: ADE encrypted VMs can be backed up to Recovery Services Vault
   - **Integration**: ADE is integrated with Azure Key Vault
+  - **Key encryption key (KEK)**: Requires a KEK based on RSA for encrypting virtual machines
+  - **PowerShell**: Use `Set-AzVMDiskEncryptionExtension` cmdlet to enable disk encryption for VMs
+  - **Compatibility requirements**: Works for VMs that meet specific disk type and OS compatibility requirements
+    - **Supported**: Basic volume and Standard SSDs
+    - **Not supported**: Ephemeral OS disks, Write Accelerator disks, or dynamic volumes
 - **Enable Ultra Disk compatibility**: Allows attaching Ultra Disks for highest performance
 - **Data disks**: Attach additional disks for data storage (number limited by VM size/type)
 
@@ -1030,6 +1046,7 @@ Most settings similar to regular VM creation.
 
 **Advanced Tab Settings:**
 
+- **Data Lake Storage Gen2**: **Hierarchical namespaces** are required for Data Lake Storage Gen2 (must be enabled during storage account creation, cannot be enabled later)
 - **Security**:
   - **"Require secure transfer for REST API operations"**: Disables HTTP access, allows only HTTPS
   - **"Allow enabling anonymous access on individual containers"**: Check only when files need to be publicly accessible (e.g., website assets like videos, JS, CSS files)
@@ -1068,6 +1085,7 @@ Most settings similar to regular VM creation.
 
 **Encryption Tab Settings:**
 
+- **Encryption scopes**: Designed to apply to **Blob storage** (containers and individual blobs within a storage account) — **File shares, queues, and tables are NOT supported**
 - **Encryption types**:
   - **MMK (Microsoft-Managed Keys)**: Default option, Microsoft manages and rotates encryption keys automatically
   - **CMK (Customer-Managed Keys)**: Customer controls encryption keys for greater security and compliance
@@ -1099,6 +1117,11 @@ Most settings similar to regular VM creation.
   - **Cool**: Infrequent access (30+ days)
   - **Cold**: Rarely accessed (90+ days)
   - **Archive**: Long-term archival storage, lowest cost, but data must be rehydrated before access (not available as default during storage account creation)
+
+#### Azure Storage Backup
+
+- **Blob storage backup frequency**: When configuring backup for blob storage, frequency can be either **daily** or **weekly**
+- **Azure File Share backup**: Azure Backup supports taking snapshots of Azure File Shares up to **6 times per day** (minimum interval of **4 hours** between backups)
 
 #### Lifecycle Management
 
@@ -1227,6 +1250,8 @@ Most settings similar to regular VM creation.
   - **Stored access policy**: Reference to predefined access policy (optional)
 - **Stored Access Policy**:
   - Created at container level: Container → **Settings** → **Access policy** → **Add policy**
+  - **Limit**: Maximum of **5 stored access policies per container**
+  - **Immutable blob stored access policies**: Can create up to **2 immutable blob stored access policies per container**
   - Define permissions, start/expiry times centrally in the policy
   - When generating SAS, select the stored access policy instead of defining parameters directly
   - **Benefits**: Centralized management - modify or revoke permissions for all SAS tokens using that policy without regenerating access keys
@@ -1636,7 +1661,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
     - **Invite user**: For users whose email is not within your organization (e.g., contractors using personal accounts or external email addresses)
       - Useful when the user's email is not `@yourcompany.onmicrosoft.com` or `@yourcompany.com`
       - Most other options are similar to "Create user" (force MFA, using location, roles, groups, etc.)
-      - Creates a **guest user account** — appropriate for external organizations (create a guest user account for each member of the external team)
+      - Creates a **guest user <!--  -->account** — appropriate for external organizations (create a guest user account for each member of the external team)
   - New users have no permissions by default, only the ability to login to the Azure portal
 - **Bulk Operations**: Available in multiple areas to perform bulk actions:
   - **Users menu**: Bulk create (download CSV template, fill with user data, and upload), bulk delete, bulk invite, download users
@@ -1735,6 +1760,14 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Department-based**: Create an Administrative Unit for "Sales Department", add Sales users and groups to it, then assign a User Administrator role scoped to that unit - they can only manage users and groups in Sales
   - **Geographic-based**: Create an Administrative Unit for "North America Region", add users and groups from that region, then assign administrators scoped to that unit - they can only manage resources in that region
 
+#### Custom Security Attributes
+
+- **Assignment targets**: Can only be assigned to **users, service principals, and managed identities** — **groups are NOT supported** as assignment targets
+- **Permissions**: By default, Global Administrators and most other admin roles do NOT automatically have permissions to read, define, or assign custom security attributes
+- **Required roles**: Permissions granted through specialized roles:
+  - **Attribute Definition Administrator**: Define custom security attributes
+  - **Attribute Assignment Administrator**: Assign custom security attributes
+
 #### Devices
 
 - **Devices** menu in Entra ID shows devices that users used to login to applications (office, home, phone) as long as they authenticated through Azure
@@ -1758,6 +1791,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **Limitations**: Cannot limit creating VMs to specific SKUs (use Azure Policy instead for resource property restrictions)
 - **Virtual Machine login permissions**: Virtual Machine Contributor role alone does not grant login permissions — the "Virtual Machine User Login" role is required to allow users to sign in to the virtual machine
 - **Virtual Machine Contributor role**: Allows managing VMs and their attached disks, but does NOT allow managing disk snapshots — for disk snapshots, use "Disk Snapshot Contributor" role
+- **Security Admin role**: Focused on managing security-related policies and configurations but does NOT grant the ability to manage access to a resource
 
 #### Assigning Roles
 
@@ -1778,6 +1812,43 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Can specify subscription(s), management group(s), or resource group(s)
   - Limits the scope where this role can be used
 - **Limit**: Maximum of 5000 custom roles per tenant (avoid creating excessive custom roles)
+
+**Sample Custom Role JSON:**
+
+```json
+{
+  "properties": {
+    "roleName": "Custom VM and Storage Operator",  // Display name of the role
+    "description": "Can start, restart, and view VMs, read storage blobs but cannot delete VMs or write to storage",  // Description of what the role does
+    "type": "Microsoft.Authorization/roleDefinitions",  // Resource type for role definitions
+    "assignableScopes": [  // Where this role can be assigned (subscription, management group, resource group)
+      "/subscriptions/{subscription-id}"
+    ],
+    "permissions": [  // List of permissions granted by this role
+      {
+        "actions": [  // Control plane actions the role can perform (management operations)
+          "Microsoft.Compute/virtualMachines/start/action",  // Can start VMs
+          "Microsoft.Compute/virtualMachines/restart/action",  // Can restart VMs
+          "Microsoft.Compute/virtualMachines/read",  // Can read/view VM properties
+          "Microsoft.Network/networkInterfaces/read",  // Can read network interface properties
+          "Microsoft.Network/publicIPAddresses/read",  // Can read public IP properties
+          "Microsoft.Storage/storageAccounts/read"  // Can read storage account properties
+        ],
+        "notActions": [  // Control plane actions explicitly excluded (overrides actions)
+          "Microsoft.Compute/virtualMachines/delete"  // Cannot delete VMs
+        ],
+        "dataActions": [  // Data plane actions (operations on data within resources)
+          "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read"  // Can read blob data
+        ],
+        "notDataActions": [  // Data plane actions explicitly excluded (overrides dataActions)
+          "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",  // Cannot write blob data
+          "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete"  // Cannot delete blob data
+        ]
+      }
+    ]
+  }
+}
+```
 
 #### Permission Combination
 
