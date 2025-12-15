@@ -1769,6 +1769,8 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - To assign a license to users: **Users** menu → open user → **Licenses** (left menu) → **Assignments** (top) → assign licenses
 - **Important**: If **"Using Location"** is not defined for the user, license assignment will fail
 - To define Using Location: Open user → **Edit Properties** → change **Using Location** in the form
+- **User deletion**: Users can be deleted regardless of licenses (directly assigned or through group membership) — licenses are freed for reassignment when user is deleted
+- **Group deletion**: A group cannot be deleted if it has licenses directly assigned
 
 #### Password Reset (Self-Service Password Reset)
 
