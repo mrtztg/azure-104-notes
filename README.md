@@ -552,6 +552,8 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - **Backup Jobs**: Vault → Monitoring → **Backup Jobs** (see ongoing backups)
 - **Diagnostic Settings**: Vault → Monitoring → Diagnostic settings → Add
   - ⚠️ Create **separate** diagnostic settings for Backup and Site Recovery (data loss prevention)
+  - ⚠️ Storage account used for diagnostic settings (e.g., Azure Backup reports) must be in the **same region** as the Recovery Services vault
+  - ✅ Log Analytics workspace location does **not** need to match the Recovery Services vault location
 - **Backup Reports**: Vault → Manage → **Backup reports**
   - Data shows up after backup jobs occur
   - Data is **up to yesterday** (no same-day data)
