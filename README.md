@@ -394,6 +394,8 @@ Check the following areas when troubleshooting:
 
 Track connectivity between sources and destinations with configurable test settings.
 
+- **Region requirement**: The source VM and the Connection Monitor instance must reside in the same Azure region
+
 **Creating a Connection Monitor:**
 
 1. **Add Test Group**:
