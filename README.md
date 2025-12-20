@@ -975,6 +975,7 @@ Azure offers multiple ways to run containers:
   - **Instance count**: Number of scale units (Standard/Premium only)
   - **Virtual network**: Must be in the same VNet as target VMs
   - **Subnet**: Requires dedicated subnet named `AzureBastionSubnet` (minimum /26)
+  - **Public IP**: Requires Standard Public IP address (for both Basic and Standard SKUs) — must be IPv4, Regional tier, and Static assignment
 - **Connect via Bastion**: VM → **Connect** → **Bastion** → Enter credentials → **Connect**
 
 ### 💾 Adding Data Disks
@@ -989,6 +990,7 @@ Azure offers multiple ways to run containers:
 ### 🔌 Attaching Network Interfaces
 
 - **Requirement**: VM must be stopped (deallocated) before attaching a Network Interface
+- **Region requirement**: Network interfaces (NICs) must be created in the same region as the virtual network (VNet) they are associated with
 
 ### 📈 Virtual Machine Scale Sets (VMSS)
 
@@ -1776,6 +1778,12 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - In **Settings > Usage + Quotas** menu, we can see different limitations of how much compute in different regions. Under "Adjustable" column, for the ones that are "yes", we can click on pen button and ask for change
 - **VM quota behavior**: Stopped (Deallocated) VMs still count against vCPU quota because Azure reserves resources for any provisioned VM, even if deallocated — only deleting the VM releases the quota
 
+
+### Azure Advisor
+
+- Provides personalized recommendations to optimize Azure resources for cost, performance, security, and more
+- **Cost recommendations**: Identifies underutilized virtual machines that can be resized to a lower-cost SKU, reducing unnecessary spend
+
 ### Entra ID Management
 
 #### Assigned Roles
@@ -1868,6 +1876,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - Useful for environment-specific access (e.g., separate prod/dev resource groups)
 - **Subscription level**: Subscription → **IAM** → Assign roles
 - **Scope inheritance**: Roles assigned at higher levels (subscription) are inherited by lower levels (resource groups, resources)
+- **Nested group limitation**: Azure role assignments do not support nested groups when the nested group is a Microsoft 365 group
 
 #### Custom Roles
 
