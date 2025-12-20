@@ -76,6 +76,7 @@ Four major categories:
 
 - Isolated private network for connecting Azure resources — most compute resources require a VNet
 - Resources can communicate with each other, internet, and on-premises networks
+- **Automatic subnet routing**: Azure automatically routes traffic between subnets within the same virtual network, allowing connectivity between VMs across subnets by default
 - When creating a VM with a VNet: Azure assigns a **private IP** from the subnet, creates a **Network Interface (NIC)**, and optionally a **public IP**
 - **Cost**: VNet itself is free
 
@@ -213,6 +214,11 @@ Four major categories:
 - Alternative to peering for connecting VNets across regions — also used for Site-to-Site (S2S) and Point-to-Site (P2S) VPN
 - **Cost advantage**: Gateway cost + **outbound traffic only** (no inbound cost) — can be cheaper than global peering if gateway already exists for VPN
   - Pricing: https://azure.microsoft.com/en-us/pricing/details/vpn-gateway/
+
+#### Site-to-Site (S2S) vs Point-to-Site (P2S) VPN
+
+- **Site-to-Site (S2S)**: Connects entire on-premises network to Azure VNet — requires VPN device on-premises (network-to-network)
+- **Point-to-Site (P2S)**: Connects individual devices to Azure VNet — no on-premises VPN device required (device-to-network)
 
 #### Setup Steps
 
@@ -465,6 +471,17 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 
 - **Option 1**: VM → Monitoring → **Insights** → Configure
 - **Option 2**: Monitor → Insights → **Virtual Machines** → Enable for the VM
+
+#### Data Collection Rules (DCRs)
+
+- Can only collect data from specific resources, primarily **virtual machines**, as data sources
+
+#### Azure Monitor Private Link Scope (AMPLS)
+
+- To ensure VMs only communicate with Azure Monitor through the specified virtual network, set up a private link connection
+- **Azure Monitor Private Link Scope (AMPLS)** allows you to create a private endpoint that enables secure communication between VMs and Azure Monitor over the virtual network
+
+![AMPLS](assets/ampls.jpg)
 
 #### App Service (Web App) Diagnostics
 
@@ -1191,6 +1208,12 @@ Most settings similar to regular VM creation.
 - **Requirements**: Blob versioning must be enabled on both accounts
 - **Location**: Storage account → **Data management** → **Object replication**
 
+#### Immutable Storage (Container-Level)
+
+- Configured using **immutability policies** (time-based retention or legal hold) at container level
+- **Location**: Container → **Access Policy** menu
+- **Time-based retention**: New blobs cannot be modified or deleted for the specified period (e.g., one year)
+
 #### AzCopy
 
 - Command-line utility for copying data to/from Azure Storage
@@ -1751,6 +1774,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **Cost Management > Budgets**: Define budget, reset budget reset period, when to receive the alert (threshold percentage)
 - **Cost Management > Advisor Recommendations**: Gives recommendations across number of categories like cost
 - In **Settings > Usage + Quotas** menu, we can see different limitations of how much compute in different regions. Under "Adjustable" column, for the ones that are "yes", we can click on pen button and ask for change
+- **VM quota behavior**: Stopped (Deallocated) VMs still count against vCPU quota because Azure reserves resources for any provisioned VM, even if deallocated — only deleting the VM releases the quota
 
 ### Entra ID Management
 
@@ -1767,6 +1791,8 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - If you have a paid license (like P2), you can enable those paid features for specific users
 - Better to enable only for users who need them, as paid features cost per person
 - **Free tenant limitation**: In a free Microsoft Entra ID tenant, you can only assign licenses to individual users — group-based licensing requires a paid version of Microsoft Entra ID
+- **Nested group limitation**: Microsoft Entra group-based licensing does not support nested group inheritance
+- **Group-based licensing behavior**: When a license is assigned to a group, licensing options are inherited by all members — individual users cannot modify or enable specific license features that were disabled at the group level
 - To view licenses: Navigate to **Entra ID → Licenses** menu
   - **All products**: Shows all available licenses
   - **Licensed Features**: Shows features included in each license
@@ -1778,7 +1804,15 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 #### Password Reset (Self-Service Password Reset)
 
-- **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or - Configure who can use it and required authentication methods — SSPR can be directly assigned only to a group of users or to ALL users, but NOT to individual users
+- **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or expired
+- Configure who can use it and required authentication methods — SSPR can be directly assigned only to a group of users or to ALL users, but NOT to individual users
+- **Administrative roles**: SSPR is enabled by default for admin roles, but they must use a **two-gate policy** (different from standard SSPR) — regular SSPR policy does not apply to administrators
+
+#### User Attribute Modification
+
+- **Cloud-only users** (members or guests): Attributes can be modified directly in Microsoft Entra ID
+- **Synced users** (from on-premises AD): Attributes must be modified in the on-premises directory — Entra ID does not allow attribute modification for synced users from the cloud interface
+- **UsageLocation exception**: UsageLocation attribute is always stored and managed in Microsoft Entra ID for all users (cloud-only and synced) — required for Microsoft 365 license assignment, can be edited directly in Entra ID portal or PowerShell
 
 #### Administrative Units
 
@@ -1875,7 +1909,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
 - Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
 - These locks help protect critical resources from accidental deletion or modification
-- **Delete lock behavior**: Delete lock prevents deletion but does NOT prevent moving resources to another resource group (moving is not a deletion operation)
+- **Move operations**: Resource locks (Read-only and Delete) do NOT block move operations — Delete lock on a resource or target resource group does not prevent resources from being moved into or out of that group
 
 ### 📋 Azure Policy
 
