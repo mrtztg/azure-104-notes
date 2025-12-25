@@ -256,6 +256,7 @@ Four major categories:
   - Select VNet to link
   - **Enable auto registration**: Automatically creates DNS records for new VMs in that VNet
   - **Note**: Auto registration is supported only for private DNS zones when linked to virtual networks, not public DNS zones
+  - **Auto-registration limitation**: Only private IP addresses of VMs are automatically registered — public IP addresses are not registered in private DNS zones
 - **Manage records**: DNS zone → **DNS Management → Recordsets**
   - View all records (including auto-registered)
   - Add records manually: A, AAAA, CNAME, MX, TXT, etc. — same as public DNS
@@ -652,6 +653,10 @@ Azure offers multiple ways to run containers:
   3. Tag image for ACR: `docker tag nginx <acr-name>.azurecr.io/nginx`
   4. Push to ACR: `docker push <acr-name>.azurecr.io/nginx`
 
+**Content Trust:**
+
+- Enable content trust to ensure only signed and trusted images can be pushed and pulled — verifies image integrity and prevents tampering
+
 ### Container Instances (ACI)
 
 - **What it is**: Fastest way to spin up containers in Azure, no VM management
@@ -974,9 +979,10 @@ Azure offers multiple ways to run containers:
   - **Tier**: Developer, Basic, Standard, Premium
   - **Instance count**: Number of scale units (Standard/Premium only)
   - **Virtual network**: Must be in the same VNet as target VMs
-  - **Subnet**: Requires dedicated subnet named `AzureBastionSubnet` (minimum /26)
+  - **Subnet**: Requires dedicated subnet named `AzureBastionSubnet` (minimum /26) — provides sufficient IP addresses for managing connections and operational capacity
   - **Public IP**: Requires Standard Public IP address (for both Basic and Standard SKUs) — must be IPv4, Regional tier, and Static assignment
 - **Connect via Bastion**: VM → **Connect** → **Bastion** → Enter credentials → **Connect**
+- **Native client support**: Requires Standard SKU (not available in Basic) — enables connecting via local RDP client (mstsc.exe) or Azure CLI (`az network bastion rdp`) — enable in Bastion configuration after upgrading to Standard
 
 ### 💾 Adding Data Disks
 
@@ -1133,6 +1139,7 @@ Most settings similar to regular VM creation.
 **Encryption Tab Settings:**
 
 - **Encryption scopes**: Designed to apply to **Blob storage** (containers and individual blobs within a storage account) — **File shares, queues, and tables are NOT supported**
+- **Using different keys for containers**: Create an encryption scope and assign it to individual containers to use a distinct encryption key for data at rest
 - **Encryption types**:
   - **MMK (Microsoft-Managed Keys)**: Default option, Microsoft manages and rotates encryption keys automatically
   - **CMK (Customer-Managed Keys)**: Customer controls encryption keys for greater security and compliance
@@ -1143,6 +1150,7 @@ Most settings similar to regular VM creation.
   - **Encryption key** source:
     - From URI: Specify key URI directly
     - From Key Vault: Select key from Azure Key Vault
+    - **Key Vault key types**: Only RSA keys are supported for customer-managed keys (maximum 4096 bits) — AES and 3DES are not supported
 - **Enhanced security**:
   - **Enable infrastructure encryption**: Adds second layer of encryption at infrastructure level (double encryption for highly sensitive data)
 
@@ -1249,6 +1257,7 @@ Most settings similar to regular VM creation.
 - Fully managed cloud file shares accessible via SMB and NFS protocols
 - **Use cases**: Shared application files, configuration files, lift-and-shift scenarios
 - **Access**: Mount as network drive on Windows/Linux/macOS (SMB requires port 445 open)
+- **net use command**: Uses SMB protocol which only supports authentication with Azure Storage account key — SAS tokens cannot be used and will result in invalid credentials error
 - **Location**: Storage account → **Data storage** → **File shares** (also accessible via Storage browser)
 - **Snapshots**: Manual one-time copy of files, browse/restore individual files (File share → **Operations** → **Snapshots**, or Windows "Previous Versions" tab)
 - **Backup**: Scheduled/frequent backup with configurable policies and retention (File share → **Operations** → **Backup**)
@@ -1814,7 +1823,9 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 - **Password Reset** menu in Entra ID enables users to reset their passwords if forgotten or expired
 - Configure who can use it and required authentication methods — SSPR can be directly assigned only to a group of users or to ALL users, but NOT to individual users
+- **Supported group types**: Security groups and Microsoft 365 groups support SSPR — Mail-enabled security groups do NOT support SSPR
 - **Administrative roles**: SSPR is enabled by default for admin roles, but they must use a **two-gate policy** (different from standard SSPR) — regular SSPR policy does not apply to administrators
+- **Configuring SSPR**: Only **Authentication Policy Administrator** role can configure SSPR — Authentication Administrator and Security Administrator cannot
 
 #### User Attribute Modification
 
