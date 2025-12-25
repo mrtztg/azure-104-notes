@@ -220,6 +220,13 @@ Four major categories:
 - **Site-to-Site (S2S)**: Connects entire on-premises network to Azure VNet — requires VPN device on-premises (network-to-network)
 - **Point-to-Site (P2S)**: Connects individual devices to Azure VNet — no on-premises VPN device required (device-to-network)
 
+#### Point-to-Site (P2S) VPN Setup
+
+- **Create GatewaySubnet**: Create a subnet named `GatewaySubnet` in the VNet (required for VPN gateway)
+- **Create VPN gateway**: Deploy VPN gateway in the VNet to provide P2S functionality
+- **Configure IP address pool**: Add an IP address pool to assign IP addresses to P2S VPN users
+- **Not required**: Local network gateway (used for S2S VPN, not P2S) — public IP addresses on VMs (users connect via VPN)
+
 #### Setup Steps
 
 1. **Create Gateway Subnet** (in both VNets):
@@ -1094,6 +1101,20 @@ Most settings similar to regular VM creation.
     - **"Geo priority replication guarantees Blob storage data is geo-replicated within 15 minutes"**
   - **GZRS (Geo-Zone-Redundant Storage)**: Safest option, combines ZRS and GRS
 
+#### Storage Redundancy Type Conversion
+
+**Simplified Pattern:**
+- **Same category (simple switch)**: LRS ↔ GRS/RA-GRS and ZRS ↔ GZRS/RA-GZRS — use Portal/PowerShell/CLI
+- **Same redundancy level (conversion)**: LRS ↔ ZRS and GRS/RA-GRS ↔ GZRS/RA-GZRS — requires conversion
+- **Cross-category**: Requires intermediate step — go through same-category type first (e.g., LRS → GRS/RA-GRS → GZRS/RA-GZRS)
+
+| Switching | ...to LRS | ...to GRS/RA-GRS | ...to ZRS | ...to GZRS/RA-GZRS |
+|-----------|-----------|-------------------|-----------|-------------------|
+| ...from LRS | N/A | Use Azure portal, PowerShell, or CLI | Perform a conversion | First switch to GRS/RA-GRS, then perform conversion to GZRS/RA-GZRS |
+| ...from GRS/RA-GRS | Use Azure portal, PowerShell, or CLI | N/A | First switch to LRS, then perform conversion to ZRS | Perform a conversion |
+| ...from ZRS | Perform a conversion | First switch to GZRS/RA-GZRS, then perform conversion to GRS/RA-GRS | N/A | Use Azure portal, PowerShell, or CLI |
+| ...from GZRS/RA-GZRS | First switch to ZRS, then perform conversion to LRS | Perform a conversion | Use Azure portal, PowerShell, or CLI | N/A |
+
 #### Storage Account Types and Archive Tier Support
 
 - **General Purpose V2**: Supports all Azure Storage tiers (Hot, Cool, Archive) — can store objects in Archive tier
@@ -1182,6 +1203,7 @@ Most settings similar to regular VM creation.
 
 - **Blob storage backup frequency**: When configuring backup for blob storage, frequency can be either **daily** or **weekly**
 - **Azure File Share backup**: Azure Backup supports taking snapshots of Azure File Shares up to **6 times per day** (minimum interval of **4 hours** between backups)
+- **Storage account types for backups**: Azure Backup uses block blobs — **BlobStorage** and **StorageV2** are suitable — **BlockBlobStorage** is more expensive (premium performance) — **FileStorage** is not suitable (intended for Azure File Shares only)
 
 #### Lifecycle Management
 
