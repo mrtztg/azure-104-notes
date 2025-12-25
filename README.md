@@ -662,6 +662,7 @@ Azure offers multiple ways to run containers:
 - **What it is**: Fastest way to spin up containers in Azure, no VM management
 - **Limitations**: No built-in scaling or orchestration — **to scale, create additional instances manually**
 - **Use cases**: Quick tests, dev/sandbox environments, not production workloads
+- **Persistent storage**: Azure Files (SMB) can be mounted as persistent storage — only supported for **Linux-based** containers (Windows containers do not support volume mounting) — Azure Table storage is not suitable (NoSQL key-value store, not a file system)
 
 **Basics Tab:**
 
@@ -689,6 +690,7 @@ Azure offers multiple ways to run containers:
 **Container Groups (CLI/PowerShell only):**
 
 - Deploy multiple containers together (like Kubernetes sidecars) — **not available in Azure Portal**
+- **Linux only**: Multi-container groups are only supported for **Linux containers** (Windows containers not supported)
 - **Use case**: Main app container + logging/monitoring sidecar container
 - **Deploy via CLI**:
   1. Create ARM template JSON file in Cloud Shell: `code container-group.json`
@@ -788,6 +790,7 @@ Azure offers multiple ways to run containers:
 **Deployment Slots** (Deployment → Deployment slots):
 
 - Create separate environments (staging, QA) for zero-downtime deployments
+- **Pricing tier requirement**: Requires Standard, Premium, or higher pricing tier — Free, Shared, and Basic tiers do NOT support deployment slots
 - **Use cases**: Staging/testing, A/B testing, blue/green deployments, quick rollback
 - **Swap**: Deploy to staging → Test → Click **Swap** to switch with production
 - **Traffic %**: Distribute traffic between slots for gradual rollouts (canary deployments)
@@ -818,7 +821,9 @@ Azure offers multiple ways to run containers:
 
 - **Automatic backups**: Every hour, up to 30 days retention, max 30 GB (excludes databases)
 - **Custom backups**: Click **Configure** (top menu) to store backups in Azure Storage
+  - **Requirement**: Azure Storage account is required to store backup data
   - **Advanced tab**: Option to include database backups
+  - **Excluding files/folders**: Create a `_backup.filter` file in the root directory to specify files or folders to exclude from backup
 
 **Networking** (Settings → Networking):
 
@@ -959,7 +964,7 @@ Azure offers multiple ways to run containers:
 - **Performance (NVMe)**: Enable NVMe storage for highest disk performance
 - **Host group**: Place VM on dedicated physical host
 - **Capacity reservations**: Reserve compute capacity in advance (beneficial when guaranteed capacity is needed for critical workloads or during high-demand periods)
-- **Proximity placement group**: Group VMs for low latency by placing them physically close
+- **Proximity placement group**: Group resources to minimize latency by ensuring they are located within the same data center — specific to a region, must be within a single resource group, and each proximity placement group is associated with only one Azure Resource Group
 
 ### 🔗 Connecting to VMs
 
