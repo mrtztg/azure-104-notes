@@ -997,6 +997,7 @@ Azure offers multiple ways to run containers:
 ### 🏰 Azure Bastion
 
 - **Purpose**: Secure browser-based RDP/SSH to VMs without public IPs, no NSG rules needed, protects against port scanning
+- **Communication**: Uses HTTPS on port 443 for secure communication — requires inbound NSG rule for port 443 to allow connections from internet to Bastion host
 - **Creation settings**:
   - **Availability zone**: Select zone for redundancy (or none)
   - **Tier**: Developer, Basic, Standard, Premium
@@ -1848,6 +1849,9 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - **Free tenant limitation**: In a free Microsoft Entra ID tenant, you can only assign licenses to individual users — group-based licensing requires a paid version of Microsoft Entra ID
 - **Nested group limitation**: Microsoft Entra group-based licensing does not support nested group inheritance
 - **Group-based licensing behavior**: When a license is assigned to a group, licensing options are inherited by all members — individual users cannot modify or enable specific license features that were disabled at the group level
+- **Supported group types for license assignment**:
+  - **Security groups**: Supported (including mail-enabled security groups)
+  - **Microsoft 365 groups**: Supported only if `securityEnabled=TRUE` — Microsoft 365 groups with `securityEnabled=FALSE` are NOT supported
 - To view licenses: Navigate to **Entra ID → Licenses** menu
   - **All products**: Shows all available licenses
   - **Licensed Features**: Shows features included in each license
@@ -1971,9 +1975,13 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 ### 📋 Azure Policy
 
-- Service for defining and enforcing governance rules at subscription or resource group level
+- Service for defining and enforcing governance rules
 - Azure provides hundreds of built-in policies ready to use
 - During resource creation, **Review + Create** step validates against assigned policies
+- **Policy assignment scopes**: Can be assigned at any level in Azure hierarchy — tenant root group, management groups, subscriptions, resource groups, and individual resources
+  - **Individual resource limitation**: Cannot assign policies to individual resources from Azure Portal — must use Azure CLI or PowerShell
+- **Policy exclusions**: Can exclude resources at any level in hierarchy — management groups, subscriptions, resource groups, and individual resources — provides flexibility in policy enforcement
+  - **Tenant Root Group limitation**: Tenant Root Group cannot be excluded from policy assignments
 - **Policy scope and application**:
   - Policies assigned at subscription level apply to resources created within that subscription
   - Policies do NOT automatically apply to resource groups themselves (unless policy specifically targets resource groups)
