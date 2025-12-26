@@ -1132,6 +1132,7 @@ Most settings similar to regular VM creation.
 - **General Purpose V2**: Supports all Azure Storage tiers (Hot, Cool, Archive) — can store objects in Archive tier
 - **General Purpose V1**: Does NOT support Archive tier — designed for general-purpose storage only
 - **Blob Storage accounts**: Blob Storage is a storage service inside the account, not a storage account type itself — not applicable for Archive tier storage account selection
+- **Archive tier redundancy support**: Only storage accounts configured for **LRS, GRS, or RA-GRS** support moving blobs to archive tier — **ZRS, GZRS, and RA-GZRS** do NOT support archive tier
 
 **Advanced Tab Settings:**
 
@@ -1222,6 +1223,7 @@ Most settings similar to regular VM creation.
 - **What it is**: Automated policy-based data management to transition blobs between tiers or delete them
 - **Location**: Storage account → **Data management** → **Lifecycle management**
 - **Benefits**: Great for saving huge money on storage costs by automatically managing data lifecycle
+- **Supported**: Block blobs and Append blobs in General Purpose V2, Premium Block Blob Storage, and Blob Storage accounts
 - **Rule configuration** (first tab):
   - **Rule Scope**:
     - **Apply rule to all blobs**: Applies to entire storage account
@@ -1266,6 +1268,7 @@ Most settings similar to regular VM creation.
 #### AzCopy
 
 - Command-line utility for copying data to/from Azure Storage
+- **Supported storage types**: Blobs and Files only (not supported for Queues or Tables)
 - **Use cases**:
   - Copy from local machine to storage account
   - Copy between storage accounts
@@ -1324,6 +1327,7 @@ Most settings similar to regular VM creation.
 #### Storage Access Keys
 
 - **Two access keys** (key1 and key2) provide full access to storage account and all data
+- **Root-level credentials**: Act like root-level credentials granting unrestricted full access to all services and data types (blobs, files, tables) regardless of Azure RBAC roles
 - **Why two keys**: Enables key rotation without downtime
   - Applications use key1 → Regenerate key2 → Switch apps to key2 → Regenerate key1
 - **Location**: Storage account → **Security + Networking** → **Access Keys**
@@ -1358,6 +1362,7 @@ Most settings similar to regular VM creation.
   - When generating SAS, select the stored access policy instead of defining parameters directly
   - **Benefits**: Centralized management - modify or revoke permissions for all SAS tokens using that policy without regenerating access keys
   - **Revoking**: Delete or modify the stored access policy to immediately affect all associated SAS tokens
+  - **Limitation**: Cannot enforce access based on blob index tags — use role assignment conditions instead for blob index tag-based access control
 - **Revoking SAS without Stored Access Policy**: Cannot revoke individual SAS tokens - only way is regenerating the access key used to create it (revokes all SAS tokens created with that key)
 - **Best practices**: Use stored access policies for easier management, shortest expiry time, minimum permissions, HTTPS-only, prefer User Delegation SAS
 
@@ -1402,7 +1407,8 @@ Most settings similar to regular VM creation.
 
 - **Method 1**: Storage account → **IAM** → **Roles** tab → Select role checkbox → Click **Add role assignment** → Assign to user/group
 - **Method 2**: Storage account → **IAM** → **Add role assignment** button → Select role → Assign to user/group/service principal
-- **Role assignment conditions**: Azure supports role assignment conditions (limiting access by IP address, resource tags, or actions when assigning RBAC) only for **Blob storage and Queue Storage** — **Tables and File shares are NOT supported**
+- **Role assignment conditions**: Azure supports role assignment conditions (limiting access by IP address, resource tags, blob index tags, or actions when assigning RBAC) only for **Blob storage and Queue Storage** — **Tables and File shares are NOT supported**
+  - **Blob index tags**: Can enforce granular access control based on blob index tags — users can be restricted to viewing only blobs matching specific index tags
 - **Scope inheritance**: Roles assigned at storage account level apply to all containers, queues, and tables within that account
 - **Resource group level**: Assign roles at resource group level for environment-specific access (e.g., separate prod/dev resource groups)
 - **Permission combination**: Role assignments are cumulative across scopes (union of all permissions)
