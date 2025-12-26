@@ -398,7 +398,18 @@ Check the following areas when troubleshooting:
 - Azure automatically creates one Network Watcher **per subscription per region** you use
 - Search "Network Watcher" to see all network watchers (don't go into individual ones — nothing specific there)
 
+### Azure Monitor Network Insights
+
+- **Location**: Azure Monitor service → **Insights** menu → **Networks**
+- Provides comprehensive visual representation of network resources through **topology**, **health**, and **metrics** — no configuration required
+- Key components: Topology, Network health and metrics, Connectivity, Traffic, Diagnostic Toolkit
+- Access to monitoring capabilities: Connection monitor, NSG flow logs, VNet flow logs, Traffic analytics, Network Watcher diagnostic tools
+
 ### Key Tools
+
+- **Topology**: **Location**: Azure Network Watcher service → **Monitoring** menu → **Topology** — visualization of virtual networks and connected resources across subscriptions, regions, and resource groups — drill down to individual resources for traffic insights and diagnostic tools — includes Geo Map view, search, filters, and download
+
+![Topology](assets/topology.jpg)
 
 - **IP Flow Verify**: Find out if a network security rule is preventing a network packet from reaching a virtual machine hosted in an Azure virtual network
 - **Connection troubleshoot**: Troubleshoot connectivity between services (VMs) and external destinations
@@ -1963,6 +1974,11 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Service for defining and enforcing governance rules at subscription or resource group level
 - Azure provides hundreds of built-in policies ready to use
 - During resource creation, **Review + Create** step validates against assigned policies
+- **Policy scope and application**:
+  - Policies assigned at subscription level apply to resources created within that subscription
+  - Policies do NOT automatically apply to resource groups themselves (unless policy specifically targets resource groups)
+  - Tag append policies apply tags to new resources created under the scope, not to existing resource groups
+  - Resource groups retain their original tags unless a policy specifically targets resource groups
 
 #### Finding and Assigning Built-in Policies
 
