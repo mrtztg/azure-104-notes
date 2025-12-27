@@ -305,6 +305,7 @@ Four major categories:
 | Gateway  | For third-party network virtual appliances (not covered in AZ-104)                                      |
 
 - **Standard SKU backend types**: IP-based (on-prem, AWS, GCP servers) or NIC-based (Azure VMs, VMSS)
+- **Standard SKU backend pool requirements**: All VMs must be in the same region and same VNet as the load balancer — VMs must have Standard SKU public IP or no public IP (Basic SKU public IP addresses are NOT supported)
 
 #### Availability Options
 
@@ -543,6 +544,10 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - **Region**: Recovery Services vault and virtual machine must be in the same region (saves transfer costs)
 - **Immutability**: Can enable at creation, disable or make irreversible later
 - Created vault found under "**Recovery Services Vault**"
+- **Vault types**:
+  - **Recovery Services vault**: Used for broader scenarios like VM, SQL, and file backups
+  - **Azure Backup vault**: Specific vault type designed for backing up individual managed disks (Azure Disk Backup) — different from Recovery Services vault
+- **Resource group deletion**: Deletion of a resource group containing a Recovery Services vault with active backup jobs or protected items will fail
 
 #### Configuring Backups
 
@@ -640,6 +645,7 @@ Azure Site Recovery (ASR) replicates workloads to a secondary region for disaste
 2. Verify ASR VM is deployed in target region
 3. Confirm everything works correctly
 4. Return to replicated item → Click **Cleanup test failover**
+- **Subnet behavior**: If no matching subnet name exists in target VNet, test VM is automatically connected to the first subnet in alphabetical order
 
 ## 📦 Azure Containers
 
@@ -768,7 +774,7 @@ Azure offers multiple ways to run containers:
   - **Static Web App**: For static HTML/CSS/JS sites with serverless APIs
 - **Operating System**: Windows or Linux (depends on runtime stack)
 - **Pricing plan**: Choose based on needs
-  - Premium plans enable **Zone Redundancy** option for high availability across availability zones
+  - **Zone Redundancy**: Only available in **Premium tier** — enables high availability across availability zones
 
 **Database Tab:**
 
@@ -831,7 +837,7 @@ Azure offers multiple ways to run containers:
 - **Scale Up** (vertical): Change server size/tier (switch between Hardware and Features tabs on top)
 - **Scale Out** (horizontal): Increase/decrease number of instances (max depends on plan tier)
   - **Manual**: Set fixed instance count
-  - **Automatic**: Define max burst and always-ready instances
+  - **Automatic**: Define max burst and always-ready instances — **only available in Standard and Premium tiers**
   - **Rules based**: Scale on metrics like CPU, memory (similar to VMSS)
   - Some options may be disabled for lower-tier plans
 
@@ -1068,6 +1074,8 @@ Most settings similar to regular VM creation.
 - **Grace period**: Wait time before monitoring starts (allow app to initialize)
 
 **Advanced Tab:** Similar to VM (extensions, custom data, proximity placement groups)
+- **Desired State Configuration (DSC) extension**: Define desired state configuration for VMs in scale set — automatically install and configure software (e.g., NGINX) on all VMs after deployment
+- **Publish-AzVMDscConfiguration cmdlet**: Upload and publish DSC configuration script to Azure storage account for use by DSC extension
 
 #### Managing VMSS
 
@@ -1692,7 +1700,8 @@ To set cost budgets in Azure:
    - Add email recipients or action groups for notifications. In **Manage Action Groups**, you can define automated actions to take place when a budget threshold is reached (such as **running an automation**, **sending SMS**, **stop all VMs**, or **triggering webhooks**).
 6. Click **Create** to save the budget.
 
-Budgets help monitor and control spending by sending alerts and taking automated actions when thresholds are reached.
+- **Purpose**: Monitoring and alerting tool only — budgets do NOT enforce or take automatic actions such as shutting down resources
+- **Action groups**: Can be configured to trigger automated actions (e.g., stop VMs, run automation, webhooks) when budget thresholds are reached — these actions are configured separately in action groups, not enforced by budgets themselves
 
 ## 💻 CLI and PowerShell
 
@@ -1977,7 +1986,8 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
 - Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
 - These locks help protect critical resources from accidental deletion or modification
-- **Move operations**: Resource locks (Read-only and Delete) do NOT block move operations — Delete lock on a resource or target resource group does not prevent resources from being moved into or out of that group
+- **Read Only lock on resource group**: Prevents adding or moving resources INTO the locked resource group — blocks all write operations including moving resources into the group
+- **Move operations**: Delete lock on a resource or target resource group does not prevent resources from being moved into or out of that group
 
 ### 📋 Azure Policy
 
@@ -2012,6 +2022,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - Copy JSON from built-in policies to learn structure and syntax
 - **Finding resource property keys**: Create resource (e.g., storage) → **Review + Create** → **Download a template for automation** or **View automation template** to see JSON keys
 - **Role definitions**: If policy requires permissions (e.g., for "DeployIfNotExists" or "Modify" effects), specify required role definitions during policy creation to grant necessary permissions
+- **Custom NSG configuration**: Built-in policies focus on general compliance — for specific custom configurations (e.g., automatically blocking specific ports like TCP 8080 in new NSGs), create custom policies tailored to your environment's unique needs
 
 **Basic policy template:**
 
