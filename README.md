@@ -156,6 +156,7 @@ Four major categories:
 
 - **To allow traffic to certain FQDNs**: Create Application Collection rules
 - Managed network security service with application and network-level filtering
+- **Connectivity limitation**: Can connect to a virtual network within the same region and resource group only
 
 ### Web Application Firewall (WAF)
 
@@ -188,6 +189,7 @@ Four major categories:
   - **Allow gateway transit**: Share VPN/ExpressRoute gateway with peered VNet
 - **After saving**: Azure creates a peering connection in **both** VNets (if both directions enabled)
 - **Note**: NSG rules may still block traffic even after peering is established
+- **Address space modification**: Address spaces cannot be modified once peering is established — if peering is in Disconnected state, delete the existing peering first, update the address space, then re-establish the peering connection
 
 ### Route Tables (User-Defined Routes)
 
@@ -1862,8 +1864,8 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 - If you have a paid license (like P2), you can enable those paid features for specific users
 - Better to enable only for users who need them, as paid features cost per person
 - **Free tenant limitation**: In a free Microsoft Entra ID tenant, you can only assign licenses to individual users — group-based licensing requires a paid version of Microsoft Entra ID
-- **Nested group limitation**: Microsoft Entra group-based licensing does not support nested group inheritance
-- **Group-based licensing behavior**: When a license is assigned to a group, licensing options are inherited by all members — individual users cannot modify or enable specific license features that were disabled at the group level
+- **Nested group limitation**: Microsoft Entra group-based licensing does not support nested groups — only direct members of the group receive the license, members through nested groups do NOT receive licenses
+- **Group-based licensing behavior**: When a license is assigned to a group, licensing options are inherited by all direct members — individual users cannot modify or enable specific license features that were disabled at the group level
 - **Supported group types for license assignment**:
   - **Security groups**: Supported (including mail-enabled security groups)
   - **Microsoft 365 groups**: Supported only if `securityEnabled=TRUE` — Microsoft 365 groups with `securityEnabled=FALSE` are NOT supported
@@ -1933,6 +1935,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
   - **Easier user onboarding**: New users can be quickly added to the system by assigning appropriate roles
   - **Scalability**: Easy to manage permissions for large numbers of users
 - **Limitations**: Cannot limit creating VMs to specific SKUs (use Azure Policy instead for resource property restrictions)
+- **Expiration**: RBAC does not natively support automatic expiration of access after a specific period — use SAS (Shared Access Signature) for expiration requirements
 - **Virtual Machine login permissions**: Virtual Machine Contributor role alone does not grant login permissions — the "Virtual Machine User Login" role is required to allow users to sign in to the virtual machine
 - **Virtual Machine Contributor role**: Allows managing VMs and their attached disks, but does NOT allow managing disk snapshots — for disk snapshots, use "Disk Snapshot Contributor" role
 - **Security Admin role**: Focused on managing security-related policies and configurations but does NOT grant the ability to manage access to a resource
@@ -1975,7 +1978,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 ### 🏷️ Tags
 
 - Key-value pair metadata applied to Azure resources for organization and management
-- Can be applied to resources, resource groups, and subscriptions
+- Can be applied to resources, resource groups, and subscriptions — NOT supported at Management Groups or Tenant Root Group
 - Common uses: cost tracking, environment identification (prod/dev), ownership, automation
 - Apply tags via resource **Settings → Tags** menu or during resource creation
 - **Important**: Tags are NOT inherited from resource groups to resources by default
@@ -1983,7 +1986,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 ### 🔒 Resource Lock
 
-- Can prevent deletion or modification at Subscription level, Resource Group level, or Resource level
+- Can prevent deletion or modification at Subscription, Resource Group, or Resource level — NOT supported at Management Groups or Tenant Root Group
 - Navigate to **Settings > Locks** menu, and add either **Read-Only** or **Delete** lock type
 - These locks help protect critical resources from accidental deletion or modification
 - **Read Only lock on resource group**: Prevents adding or moving resources INTO the locked resource group — blocks all write operations including moving resources into the group
