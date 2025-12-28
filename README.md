@@ -108,6 +108,7 @@ Four major categories:
 ### Network Security Groups (NSGs)
 
 - Act as firewalls for Azure resources — can be attached to **Network Interfaces (NIC)** or **Subnets**
+- **Region requirement**: NSG must be in the same region as the virtual network or subnets to which it is applied
 - Define **Inbound rules** (traffic coming in) and **Outbound rules** (traffic going out)
 - Rules specify: Priority, Source/Destination (IP, Service Tag, ASG), Port, Protocol, Action (Allow/Deny)
 - **Priority**: Lower number = higher priority (evaluated first, range 100-4096)
@@ -407,6 +408,7 @@ Check the following areas when troubleshooting:
 - Provides comprehensive visual representation of network resources through **topology**, **health**, and **metrics** — no configuration required
 - Key components: Topology, Network health and metrics, Connectivity, Traffic, Diagnostic Toolkit
 - Access to monitoring capabilities: Connection monitor, NSG flow logs, VNet flow logs, Traffic analytics, Network Watcher diagnostic tools
+- **Requires NSG flow logs**: Relies on NSG flow logs to analyze and detect suspicious network traffic — enabling NSG flow logs is a prerequisite for processing network traffic data and identifying anomalies
 
 ### Key Tools
 
@@ -414,8 +416,11 @@ Check the following areas when troubleshooting:
 
 ![Topology](assets/topology.jpg)
 
-- **IP Flow Verify**: Find out if a network security rule is preventing a network packet from reaching a virtual machine hosted in an Azure virtual network
-- **Connection troubleshoot**: Troubleshoot connectivity between services (VMs) and external destinations
+- **IP Flow Verify**: Checks if a specific packet is allowed or denied by security rules (does not validate end-to-end connectivity)
+- **Connection troubleshoot**: Validates outbound connectivity from VMs to external hosts — checks end-to-end connection, network latency, packet loss, and identifies failure points
+- **Next hop**: Shows the next hop a packet will take to reach its destination (does not validate the connection itself)
+- **NSG flow logs**: Records traffic through NSGs for analysis (does not validate connectivity) — captures source/destination IPs, ports, and protocols — required for Azure Monitor Network Insights to detect suspicious traffic
+- **Traffic Analytics**: Analyzes traffic patterns and usage (does not validate specific connections)
 - **Connection monitor**: Track connectivity over time (latency, packet loss), alert on unstable or unreachable connections
 
 ### Connection Monitor
