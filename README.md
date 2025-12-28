@@ -204,6 +204,7 @@ Four major categories:
   - **Service chaining**: Route traffic from on-premises through VPN gateway to another VNet using UDRs (leverages existing peering, minimizes costs vs Azure Firewall/ExpressRoute)
 - **Route priority**: Lower priority number = higher precedence (evaluated first)
 - **Next hop types**: Virtual Appliance, VPN Gateway, Virtual Network, Internet, None (blackhole)
+- **Association**: Route tables can be associated to **Subnets** only — not to VNets or NICs
 - **Location**: Search "Route tables" in Azure Portal → Create route table → Add routes → Associate with subnets
 
 ### Service Endpoint Policies
@@ -309,6 +310,7 @@ Four major categories:
 
 - **Standard SKU backend types**: IP-based (on-prem, AWS, GCP servers) or NIC-based (Azure VMs, VMSS)
 - **Standard SKU backend pool requirements**: All VMs must be in the same region and same VNet as the load balancer — VMs must have Standard SKU public IP or no public IP (Basic SKU public IP addresses are NOT supported)
+- **Standard, Internet-facing Load Balancer best practice**: VMs in backend pool should **not** have individual public IP addresses — all inbound traffic should go through the load balancer's frontend public IP, which distributes traffic to backend VMs
 
 #### Availability Options
 
@@ -373,6 +375,7 @@ Check the following areas when troubleshooting:
 3. **Health probes**: Verify protocol (HTTP/HTTPS/TCP), port, path (e.g., `/health`), interval, and threshold settings
 4. **Load balancing rules**: Verify frontend IP selected, frontend/backend ports match app, correct backend pool assigned, session persistence and idle timeout configured correctly
 5. **Outbound rules**: Check when backend VMs can't reach the internet (SNAT port exhaustion, missing outbound rule)
+6. **Monitoring network traffic**: Enable NSG flow logs on NSG associated with subnet or network interface to collect data about IP addresses connecting to the load balancer
 
 #### Health Probe Alerts
 
@@ -409,6 +412,7 @@ Check the following areas when troubleshooting:
 - Key components: Topology, Network health and metrics, Connectivity, Traffic, Diagnostic Toolkit
 - Access to monitoring capabilities: Connection monitor, NSG flow logs, VNet flow logs, Traffic analytics, Network Watcher diagnostic tools
 - **Requires NSG flow logs**: Relies on NSG flow logs to analyze and detect suspicious network traffic — enabling NSG flow logs is a prerequisite for processing network traffic data and identifying anomalies
+- **Log Analytics workspace**: NSG flow logs are sent to a Log Analytics workspace for analysis
 
 ### Key Tools
 
@@ -419,7 +423,7 @@ Check the following areas when troubleshooting:
 - **IP Flow Verify**: Checks if a specific packet is allowed or denied by security rules (does not validate end-to-end connectivity)
 - **Connection troubleshoot**: Validates outbound connectivity from VMs to external hosts — checks end-to-end connection, network latency, packet loss, and identifies failure points
 - **Next hop**: Shows the next hop a packet will take to reach its destination (does not validate the connection itself)
-- **NSG flow logs**: Records traffic through NSGs for analysis (does not validate connectivity) — captures source/destination IPs, ports, and protocols — required for Azure Monitor Network Insights to detect suspicious traffic
+- **NSG flow logs**: Records traffic through NSGs for analysis (does not validate connectivity) — captures source/destination IPs, ports, and protocols — required for Azure Monitor Network Insights to detect suspicious traffic — enable on NSG associated with subnet or network interface to collect data about IP addresses connecting to resources (e.g., load balancers)
 - **Traffic Analytics**: Analyzes traffic patterns and usage (does not validate specific connections)
 - **Connection monitor**: Track connectivity over time (latency, packet loss), alert on unstable or unreachable connections
 
@@ -538,6 +542,24 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - **Pre-built queries**: Available in the queries hub for each resource type
   - Examples: "Get replication health status history", "Virtual Machine available memory"
   - Use them directly or learn KQL from their syntax
+
+### Alert Rules and Action Groups
+
+- **Alert rules**: Define conditions that trigger notifications or actions
+- **Action groups**: Reusable collections of notification preferences and actions (email, SMS, webhooks, automation runbooks) — define who gets notified and how
+- **Alert rule calculation**: Alert rules are based on unique combinations of **signal type** (Metric vs. Activity log) and **conditions** — each unique combination requires a separate alert rule
+  - **Example**: Monitoring a storage account with 2 metric alerts (Ingress, Egress) and 2 activity log alerts (Delete storage account, Restore blob ranges) = **4 alert rules** required
+- **Action group calculation**: Create a separate action group only when the **set of recipients (users) is different** — action groups can be reused across multiple alert rules when they notify the same set of users
+  - **Example**: If Ingress notifies User1 and User3, and Restore blob ranges also notifies User1 and User3 → reuse the same action group for both alert rules
+  - **Example**: 3 unique sets of recipients (User1+User3, User1 only, User1+User2+User3) = **3 action groups** required
+- **Rate limit thresholds**:
+
+| Action Type | Production | Test Action Group |
+| ----------- | ---------- | ----------------- |
+| **SMS**     | No more than 1 SMS every 5 minutes | No more than 1 SMS every 1 minute |
+| **Voice**   | No more than 1 call every 5 minutes | No more than 1 call every 1 minute |
+| **Email**   | No more than 100 emails per hour | No more than 2 emails per minute |
+| **Other actions** | Not rate limited | Not rate limited |
 
 ## 🔄 Backup & Recovery
 
@@ -851,8 +873,11 @@ Azure offers multiple ways to run containers:
 **Backups** (Settings → Backups):
 
 - **Automatic backups**: Every hour, up to 30 days retention, max 30 GB (excludes databases)
+- **Deployment slots**: App Service does **not** automatically back up deployment slots other than the production slot unless explicitly configured
+- **Restore backups**: Can restore a backup taken from the production slot to any other slot of the same app, including test slots
 - **Custom backups**: Click **Configure** (top menu) to store backups in Azure Storage
   - **Requirement**: Azure Storage account is required to store backup data
+  - **Retention**: Setting retention to **0** means backups are retained indefinitely unless manually deleted
   - **Advanced tab**: Option to include database backups
   - **Excluding files/folders**: Create a `_backup.filter` file in the root directory to specify files or folders to exclude from backup
 
@@ -897,6 +922,9 @@ Azure offers multiple ways to run containers:
   - **Availability zone**: Deploy VM in specific zone within region (protects against datacenter failures)
   - **Virtual machine scale set**: Auto-scaling group of identical VMs with load balancing
   - **Availability set**: Group VMs across fault domains and update domains within single datacenter (99.95% SLA)
+    - **Update domains**: Ensure VMs in different update domains are not rebooted simultaneously during planned maintenance — place VMs in separate update domains to maintain availability during OS patching or platform updates
+      - **Example**: 2 VMs in an availability set with 2 update domains — during planned maintenance, only one VM reboots at a time, keeping the application available
+    - **Fault domains**: Protect against hardware failures by distributing VMs across different physical servers
     - **Limitation**: Availability sets cannot protect VMs from data center-level failure — use Availability zones for data center failure protection
     - **Resizing when size unavailable**: If VM size is unavailable, first **deallocate the VM** (releases hardware allocation) then attempt to resize
 - **Security type**:
@@ -1102,9 +1130,10 @@ Most settings similar to regular VM creation.
   - **Queue Storage**: Message queuing for distributed apps
 - Available as **local** (regionally-redundant) or **global** (geo-redundant/global endpoints) storage
 - Storage tiers for Blobs:
-  - **Hot**: Frequent access, higher cost
-  - **Cool**: Infrequent access, cheaper for storage
-  - **Archive**: Rarely accessed, lowest cost, high retrieval time
+  - **Hot**: Frequent access, higher cost — no early deletion penalty
+  - **Cool**: Infrequent access, cheaper for storage — 30-day minimum retention
+  - **Cold**: Rarely accessed, lower cost — 90-day minimum retention
+  - **Archive**: Rarely accessed, lowest cost, high retrieval time — 180-day minimum retention
 - Managed vs. Unmanaged Disks:
   - **Managed Disks**: Azure handles storage accounts, high scalability/reliability, easier to manage
   - **Unmanaged Disks**: User manages storage accounts, legacy usage only
@@ -1121,12 +1150,15 @@ Most settings similar to regular VM creation.
   - **Standard**: Lower storage cost, higher transaction/operation cost
   - **Premium**: Higher storage cost, lower read operation cost (better for high-transaction workloads)
 - **Redundancy options** (some regions may not support all options):
-  - **LRS (Locally Redundant Storage)**: 3 copies within single data center (Microsoft maintains 2 additional copies as disks fail over time)
-  - **ZRS (Zone-Redundant Storage)**: 3 copies across availability zones within a region
-  - **GRS (Geo-Redundant Storage)**: 6 copies across 2 regions (3 in primary, 3 in secondary)
-    - **"Make read access to data available in the event of regional unavailability"**: Enables RA-GRS (slightly higher cost)
-    - **"Geo priority replication guarantees Blob storage data is geo-replicated within 15 minutes"**
-  - **GZRS (Geo-Zone-Redundant Storage)**: Safest option, combines ZRS and GRS
+
+| Redundancy Type | Number of Copies | Description |
+| --------------- | ---------------- | ----------- |
+| **LRS** (Locally Redundant Storage) | 3 copies | Within single data center (Microsoft maintains 2 additional copies as disks fail over time) |
+| **ZRS** (Zone-Redundant Storage) | 3 copies | Across availability zones within a region |
+| **GRS** (Geo-Redundant Storage) | 6 copies | Across 2 regions (3 in primary, 3 in secondary) |
+| **RA-GRS** (Read-Access Geo-Redundant Storage) | 6 copies | Same as GRS with read access to secondary region (slightly higher cost) |
+| **GZRS** (Geo-Zone-Redundant Storage) | 6 copies | Combines ZRS and GRS (3 in primary region across zones, 3 in secondary region) |
+| **RA-GZRS** (Read-Access Geo-Zone-Redundant Storage) | 6 copies | Same as GZRS with read access to secondary region |
 
 #### Storage Redundancy Type Conversion
 
@@ -1158,9 +1190,9 @@ Most settings similar to regular VM creation.
   - **"Enable storage account key access"**: Allows key-based authentication (disable to enforce Entra ID only)
   - **"Default to Microsoft Entra Authentication in the Azure portal"**: Uses Entra ID (RBAC) instead of storage keys
 - **Blob storage access tiers** (default tier for new blobs, can be set per file):
-  - **Hot**: Frequent access, optimized for data accessed regularly, higher storage cost, lower access cost
-  - **Cool**: Infrequent access (30+ days retention), lower storage cost, higher access cost
-  - **Cold**: Rarely accessed (90+ days retention), even lower storage cost, even higher access cost
+  - **Hot**: Frequent access, optimized for data accessed regularly, higher storage cost, lower access cost — no early deletion penalty
+  - **Cool**: Infrequent access (30+ days retention), lower storage cost, higher access cost — 30-day minimum retention
+  - **Cold**: Rarely accessed (90+ days retention), even lower storage cost, even higher access cost — 90-day minimum retention
 
 **Networking Tab Settings:**
 
@@ -1259,10 +1291,11 @@ Most settings similar to regular VM creation.
   - **Move to cold tier**: After X days since creation/last modification/last access
   - **Move to archive tier**: After X days since creation/last modification/last access
   - **Delete blobs**: After X days since creation/last modification/last access
-- **Minimum retention requirements** (charged for minimum period even if moved/deleted earlier):
-  - **Cool tier**: Minimum 30 days
-  - **Cold tier**: Minimum 90 days
-  - **Archive tier**: Minimum 180 days
+- **Early deletion penalty** (charged for minimum retention period if moved/deleted earlier):
+  - **Hot tier**: No minimum retention period — early deletion penalty does not apply
+  - **Cool tier**: Minimum 30 days retention
+  - **Cold tier**: Minimum 90 days retention
+  - **Archive tier**: Minimum 180 days retention
 
 #### Object Replication
 
