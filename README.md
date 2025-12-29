@@ -655,6 +655,12 @@ Azure Site Recovery (ASR) replicates workloads to a secondary region for disaste
 - **Availability options**: Single Instance, Availability Set, Availability Zone, VMSS
 - Configure: Proximity placement, capacity reservation, storage settings, replication settings
 
+#### VMware vSphere Migration
+
+- **Goal**: Migrate virtual machines from VMware vSphere to Azure using Azure Site Recovery (ASR)
+- **After creating Recovery Services vault**: Next step is to configure a **virtual network in Azure** — acts as target network for migrated VMs
+- **OVA template**: Not required for ASR (OVA is specific to Azure Migrate, not ASR)
+
 #### Managing Replicated Items
 
 - After creation, find vault in "**Recovery Services Vaults**"
@@ -1044,7 +1050,7 @@ Azure offers multiple ways to run containers:
   - **Tier**: Developer, Basic, Standard, Premium
   - **Instance count**: Number of scale units (Standard/Premium only)
   - **Virtual network**: Must be in the same VNet as target VMs
-  - **Subnet**: Requires dedicated subnet named `AzureBastionSubnet` (minimum /26) — provides sufficient IP addresses for managing connections and operational capacity
+  - **Subnet**: Requires dedicated subnet named `AzureBastionSubnet` — recommended to allocate at least /26 prefix to support scaling and additional features
   - **Public IP**: Requires Standard Public IP address (for both Basic and Standard SKUs) — must be IPv4, Regional tier, and Static assignment
 - **Connect via Bastion**: VM → **Connect** → **Bastion** → Enter credentials → **Connect**
 - **Native client support**: Requires Standard SKU (not available in Basic) — enables connecting via local RDP client (mstsc.exe) or Azure CLI (`az network bastion rdp`) — enable in Bastion configuration after upgrading to Standard
@@ -1346,6 +1352,7 @@ Most settings similar to regular VM creation.
 
 - Fully managed cloud file shares accessible via SMB and NFS protocols
 - **Use cases**: Shared application files, configuration files, lift-and-shift scenarios
+- **Access format**: `\\<storage-account-name>.file.core.windows.net\<file-share-name>` (e.g., `\\contosostorage.file.core.windows.net\data`)
 - **Access**: Mount as network drive on Windows/Linux/macOS (SMB requires port 445 open)
 - **net use command**: Uses SMB protocol which only supports authentication with Azure Storage account key — SAS tokens cannot be used and will result in invalid credentials error
 - **Location**: Storage account → **Data storage** → **File shares** (also accessible via Storage browser)
