@@ -207,6 +207,12 @@ Four major categories:
 - **Association**: Route tables can be associated to **Subnets** only — not to VNets or NICs
 - **Location**: Search "Route tables" in Azure Portal → Create route table → Add routes → Associate with subnets
 
+### Service Endpoints
+
+- Extends VNet identity to Azure services over optimized route
+- **Storage accounts**: One service endpoint can be used for all storage accounts deployed in the same region
+- **Azure AD**: Service endpoints are not needed for Azure AD — VMs accessing Azure AD users rely on Azure AD's authentication and authorization mechanisms, which operate independently of VNet service endpoints
+
 ### Service Endpoint Policies
 
 - **Requirements for applying to subnet**:
@@ -310,6 +316,7 @@ Four major categories:
 
 - **Standard SKU backend types**: IP-based (on-prem, AWS, GCP servers) or NIC-based (Azure VMs, VMSS)
 - **Standard SKU backend pool requirements**: All VMs must be in the same region and same VNet as the load balancer — VMs must have Standard SKU public IP or no public IP (Basic SKU public IP addresses are NOT supported)
+- **Basic SKU backend pool requirements**: All virtual machines in the backend pool must be in the same availability set or virtual machine scale set
 - **Standard, Internet-facing Load Balancer best practice**: VMs in backend pool should **not** have individual public IP addresses — all inbound traffic should go through the load balancer's frontend public IP, which distributes traffic to backend VMs
 
 #### Availability Options
@@ -576,8 +583,9 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 - **Immutability**: Can enable at creation, disable or make irreversible later
 - Created vault found under "**Recovery Services Vault**"
 - **Vault types**:
-  - **Recovery Services vault**: Used for broader scenarios like VM, SQL, and file backups
+  - **Recovery Services vault**: Used for broader scenarios like VM, SQL, and file backups — one vault can include backups of various services (VM, File share, etc.) — one vault per region
   - **Azure Backup vault**: Specific vault type designed for backing up individual managed disks (Azure Disk Backup) — different from Recovery Services vault
+- **Backup policy**: Per region, per service type — cannot have one backup policy for both VM and file shares (each service type requires its own policy)
 - **Resource group deletion**: Deletion of a resource group containing a Recovery Services vault with active backup jobs or protected items will fail
 
 #### Configuring Backups
@@ -1185,7 +1193,7 @@ Most settings similar to regular VM creation.
 #### Storage Account Types and Archive Tier Support
 
 - **General Purpose V2**: Supports all Azure Storage tiers (Hot, Cool, Archive) — can store objects in Archive tier
-- **General Purpose V1**: Does NOT support Archive tier — designed for general-purpose storage only
+- **General Purpose V1**: Supports Blob containers but does NOT support tiering (Hot, Cool, Archive) — designed for general-purpose storage only
 - **Blob Storage accounts**: Blob Storage is a storage service inside the account, not a storage account type itself — not applicable for Archive tier storage account selection
 - **Archive tier redundancy support**: Only storage accounts configured for **LRS, GRS, or RA-GRS** support moving blobs to archive tier — **ZRS, GZRS, and RA-GZRS** do NOT support archive tier
 
