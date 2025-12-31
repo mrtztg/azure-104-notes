@@ -76,6 +76,7 @@ Four major categories:
 
 - Isolated private network for connecting Azure resources — most compute resources require a VNet
 - Resources can communicate with each other, internet, and on-premises networks
+- **Default communication**: By default, Azure allows full communication between resources within the same virtual network (unless blocked by NSG inbound/outbound rules)
 - **Automatic subnet routing**: Azure automatically routes traffic between subnets within the same virtual network, allowing connectivity between VMs across subnets by default
 - When creating a VM with a VNet: Azure assigns a **private IP** from the subnet, creates a **Network Interface (NIC)**, and optionally a **public IP**
 - **Cost**: VNet itself is free
@@ -555,6 +556,7 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
 ### Alert Rules and Action Groups
 
 - **Alert rules**: Define conditions that trigger notifications or actions
+- **Alert status**: Can be changed between **New**, **Acknowledged**, and **Closed** at any point — even if marked as Closed, alerts can be reopened and transitioned back to New or Acknowledged — allows teams to revisit alerts and reassess status as conditions change
 - **Action groups**: Reusable collections of notification preferences and actions (email, SMS, webhooks, automation runbooks) — define who gets notified and how
 - **Alert rule calculation**: Alert rules are based on unique combinations of **signal type** (Metric vs. Activity log) and **conditions** — each unique combination requires a separate alert rule
   - **Example**: Monitoring a storage account with 2 metric alerts (Ingress, Egress) and 2 activity log alerts (Delete storage account, Restore blob ranges) = **4 alert rules** required
@@ -586,6 +588,8 @@ Centralised dashboard for metrics, logs, alerts, and diagnostics across all Azur
   - **Recovery Services vault**: Used for broader scenarios like VM, SQL, and file backups — one vault can include backups of various services (VM, File share, etc.) — one vault per region
   - **Azure Backup vault**: Specific vault type designed for backing up individual managed disks (Azure Disk Backup) — different from Recovery Services vault
 - **Backup policy**: Per region, per service type — cannot have one backup policy for both VM and file shares (each service type requires its own policy)
+- **Enhanced policies**: Support backing up Linux VMs with Trusted Launch — designed to support advanced VM security configurations
+- **Standard policies**: Fully support backing up Windows VMs with Azure Disk Encryption enabled
 - **Resource group deletion**: Deletion of a resource group containing a Recovery Services vault with active backup jobs or protected items will fail
 
 #### Configuring Backups
@@ -1192,8 +1196,9 @@ Most settings similar to regular VM creation.
 
 #### Storage Account Types and Archive Tier Support
 
-- **General Purpose V2**: Supports all Azure Storage tiers (Hot, Cool, Archive) — can store objects in Archive tier
+- **General Purpose V2 (StorageV2)**: Most versatile — supports blobs, files, queues, and tables — supports all access tiers (Hot, Cool, Archive) — supports object replication — recommended for flexibility in storage capabilities
 - **General Purpose V1**: Supports Blob containers but does NOT support tiering (Hot, Cool, Archive) — designed for general-purpose storage only
+- **File Storage**: Does NOT support tiering — intended for Azure File Shares only
 - **Blob Storage accounts**: Blob Storage is a storage service inside the account, not a storage account type itself — not applicable for Archive tier storage account selection
 - **Archive tier redundancy support**: Only storage accounts configured for **LRS, GRS, or RA-GRS** support moving blobs to archive tier — **ZRS, GZRS, and RA-GZRS** do NOT support archive tier
 
@@ -1532,6 +1537,9 @@ Most settings similar to regular VM creation.
 - **ARM Templates**: JSON files for repeatable infrastructure deployments
   - **Template file**: Resource definitions with `parameters` section
   - **Parameters file**: Define parameter values separately (reuse templates with different configs)
+- **Deployment modes**:
+  - **Complete mode**: Ensures all existing resources in the specified resource group are deleted if they are not defined in the ARM template
+  - **Incremental mode**: Only adds, updates, or removes resources defined in the template (default mode)
 - **Get templates**: In **Review + Create** → **Download a template for automation**
 - **View past deployments**: Resource group → **Settings** → **Deployments**
 
@@ -1688,6 +1696,7 @@ Most settings similar to regular VM creation.
   ```
   - Skips resources that already exist (incremental deployment by default)
   - Fill required values in parameters file (e.g., passwords) — template export skips sensitive fields
+- **Subscription-level deployment**: In `New-AzSubscriptionDeployment`, the `-Location` parameter refers to the location of the deployment metadata, not the location of the resources being created
 - **Tip**: For constant values you don't want to provide every deployment, move them from `parameters` to `variables`
 - **Other IaC tools** (not in exam): Azure Bicep, Terraform
 
@@ -1998,6 +2007,7 @@ New-AzPolicyAssignment -Scope $rg.ResourceId `
 
 #### Assigning Roles
 
+- **Valid principals**: Azure RBAC role assignments (including roles like Storage File Data SMB Share Reader) can only be assigned to **users, groups, service principals, and managed identities** in Microsoft Entra ID — **computer accounts are NOT valid principals** for Azure RBAC role assignments
 - **Resource level**: Resource → **IAM** → **Add role assignment** → Select role → Assign to user/group/service principal
 - **Resource group level**: Resource Groups → Select resource group → **IAM** → Assign roles
   - Useful for environment-specific access (e.g., separate prod/dev resource groups)
