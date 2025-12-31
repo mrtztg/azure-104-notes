@@ -425,7 +425,9 @@ Check the following areas when troubleshooting:
 - **Next hop**: Shows the next hop a packet will take to reach its destination (does not validate the connection itself)
 - **NSG flow logs**: Records traffic through NSGs for analysis (does not validate connectivity) — captures source/destination IPs, ports, and protocols — required for Azure Monitor Network Insights to detect suspicious traffic — enable on NSG associated with subnet or network interface to collect data about IP addresses connecting to resources (e.g., load balancers)
 - **Traffic Analytics**: Analyzes traffic patterns and usage (does not validate specific connections)
-- **Connection monitor**: Track connectivity over time (latency, packet loss), alert on unstable or unreachable connections
+- **Connection monitor**: Track connectivity over time (latency, packet loss), alert on unstable or unreachable connections — monitors connectivity status and latency between endpoints, **not traffic content** — use **Packet Capture** to inspect all network traffic
+- **Packet Capture**: Capture network traffic for deeper inspection and analysis
+- **Network In/Out metrics**: Azure Monitor metrics on Network In and Network Out only provide traffic volume, not traffic content — use Packet Capture or NSG flow logs for traffic inspection
 
 ### Connection Monitor
 
@@ -928,9 +930,9 @@ Azure offers multiple ways to run containers:
   - **Availability zone**: Deploy VM in specific zone within region (protects against datacenter failures)
   - **Virtual machine scale set**: Auto-scaling group of identical VMs with load balancing
   - **Availability set**: Group VMs across fault domains and update domains within single datacenter (99.95% SLA)
-    - **Update domains**: Ensure VMs in different update domains are not rebooted simultaneously during planned maintenance — place VMs in separate update domains to maintain availability during OS patching or platform updates
+    - **Update domains**: Ensure VMs in different update domains are not rebooted simultaneously during planned maintenance — place VMs in separate update domains to maintain availability during OS patching or platform updates — Azure Availability Sets support up to **20 update domains by default** — 0 update domains would mean no update domain distribution, resulting in all VMs potentially being impacted by maintenance at the same time
       - **Example**: 2 VMs in an availability set with 2 update domains — during planned maintenance, only one VM reboots at a time, keeping the application available
-    - **Fault domains**: Protect against hardware failures by distributing VMs across different physical servers
+    - **Fault domains**: Protect against hardware failures by distributing VMs across different physical servers — in regions that support it, availability sets can be spread across up to **3 fault domains by default** (maximizes availability by distributing VMs across more physical racks, increasing likelihood of VM availability during fabric failure) — 0, 1, or 2 fault domains provide less optimal distribution compared to 3
     - **Limitation**: Availability sets cannot protect VMs from data center-level failure — use Availability zones for data center failure protection
     - **Resizing when size unavailable**: If VM size is unavailable, first **deallocate the VM** (releases hardware allocation) then attempt to resize
 - **Security type**:
@@ -1230,7 +1232,7 @@ Most settings similar to regular VM creation.
 
 **Encryption Tab Settings:**
 
-- **Encryption scopes**: Designed to apply to **Blob storage** (containers and individual blobs within a storage account) — **File shares, queues, and tables are NOT supported**
+- **Encryption scopes**: Designed to apply to **Azure Blob Storage and Data Lake Gen2 storage accounts** (containers and individual blobs within a storage account) — **File shares, queues, and tables are NOT supported**
 - **Using different keys for containers**: Create an encryption scope and assign it to individual containers to use a distinct encryption key for data at rest
 - **Encryption types**:
   - **MMK (Microsoft-Managed Keys)**: Default option, Microsoft manages and rotates encryption keys automatically
@@ -1256,7 +1258,7 @@ Most settings similar to regular VM creation.
 
 - **Containers**: Organize blobs within storage account (like folders/boxes to put blobs in)
 - **Blob types**:
-  - **Block blobs**: Designed to store large amounts of unstructured data (images, backups, thousands of image files)
+  - **Block blobs**: Typically used for storing general-purpose files and are the default choice for most Azure blob storage scenarios, including lifecycle management — designed to store large amounts of unstructured data (images, backups, thousands of image files) — appropriate selection when moving blobs to different access tiers
   - **Append blobs**: Used for log data where the need is to continuously append new data
   - **Page blobs**: Typically used for storing virtual hard disks (VHDs) for Azure virtual machines
 - **Blob access tiers**: Can be set during file upload or changed later from top menu:
@@ -1332,6 +1334,7 @@ Most settings similar to regular VM creation.
   - **Entra ID (Microsoft Entra)**: `azcopy login` (recommended for interactive use)
   - **SAS token**: Append SAS token to destination URL
   - **Access key**: Via connection string or storage account key
+- **Azure File shares authentication**: Azure File shares only support SAS as an authentication method for all operations when using AzCopy
 - **Common commands**:
   - `azcopy copy <source> <destination>`: Copy files
   - `azcopy sync <source> <destination>`: Sync directories (one-way)
